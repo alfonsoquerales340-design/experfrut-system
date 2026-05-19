@@ -1,0 +1,37 @@
+{
+  "name": "Experfrut Sistema",
+  "short_name": "Experfrut",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2E7D32",
+  "icons": [
+    {
+      "src": "/static/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
+3. El toque final en el HTML
+
+Además del manifest, es bueno añadir unas etiquetas en el <head> de tu HTML para asegurar que los teléfonos iPhone y otros navegadores reconozcan el icono de inmediato:
+HTML
+
+<!-- Icono para navegadores estándar -->
+<link rel="icon" type="image/png" href="/static/img/icon-192.png">
+
+<!-- Icono para iPhone/iOS -->
+<link rel="apple-touch-icon" href="/static/img/icon-192.png">
+
+<!-- Color de la barra de estado en el móvil -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
