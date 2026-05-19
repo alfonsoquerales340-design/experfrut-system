@@ -10,35 +10,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-5#4*^3zx(xjix)4nqmpyq*$=w#t%_#yl&-5m(s^ov7lilr9ybk'
 
-DEBUG = False
+# El DEBUG dinámico permite desarrollo local y producción automática en Railway
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Permitir conexiones locales y de red (Ngrok incluido)
-# Configuración de URLs permitidas (El '*' incluye ngrok, localhost y Render automáticamente)
-ALLOWED_HOSTS = ['*']
+# Autorizar Railway y Ngrok de forma dinámica y segura
+ALLOWED_HOSTS = ['*', 'web-production-c14c2.up.railway.app', 'localhost', '127.0.0.1']
 
-# Configuración de archivos estáticos
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Configuración de archivos multimedia (imágenes cargadas por usuarios)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Configuración del proyecto interno de Django
+# Configuración del proyecto interno de Django (¡CORREGIDO PARA TU PROYECTO ACTUAL!)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ROOT_URLCONF = 'experfrut_project.urls'
 WSGI_APPLICATION = 'experfrut_project.wsgi.application'
 
-# Confianza para túneles externos
-CSRF_TRUSTED_ORIGINS = ['https://theatrics-facsimile-entrench.ngrok-free.dev']
+# Confianza para túneles externos y Railway
+CSRF_TRUSTED_ORIGINS = [
+    'https://theatrics-facsimile-entrench.ngrok-free.dev',
+    'https://web-production-c14c2.up.railway.app'
+]
 
 # ==============================================================================
-# 2. DEFINICIÓN DE APLICACIONES
+# 2. DEFINICIÓN DE APLICACIONES (¡CORREGIDO EL ORDEN PARA JAZZMIN!)
 # ==============================================================================
 INSTALLED_APPS = [
+    'jazzmin',  # <-- Jazzmin SIEMPRE debe ir antes de django.contrib.admin
     'tienda',
-    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -59,7 +53,7 @@ INSTALLED_APPS = [
 # ==============================================================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # <-- Ponla aquí exacto
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Soporte eficiente para archivos estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -100,16 +94,18 @@ TEMPLATES = [
 ]
 
 # ==============================================================================
-# 5. BASE DE DATOS Y LOCALIZACIÓN
+# 5. BASE DE DATOS OPTIMIZADA PARA LOCAL Y PRODUCTION
 # ==============================================================================
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600
+        conn_max_age=600,
+        ssl_require=False if os.environ.get('LOCAL_DEVELOPMENT') else True
     )
 }
+
 # ==============================================================================
-# 6. ARCHIVOS ESTÁTICOS
+# 6. ARCHIVOS ESTÁTICOS Y MULTIMEDIA (Limpio y unificado sin duplicados)
 # ==============================================================================
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
@@ -118,7 +114,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Almacenamiento optimizado para WhiteNoise en producción
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ==============================================================================
 # 7. JAZZMIN SETTINGS
@@ -133,9 +130,7 @@ JAZZMIN_SETTINGS = {
     
     # 1. MENÚ SUPERIOR (Navegación principal)
     "topmenu_links": [
-        # Redirige directo al index de la tienda usando el name='index' de tu urls.py
         {"name": "Ir para a Loja", "url": "index", "permissions": ["auth.view_user"], "icon": "fas fa-store", "new_window": False},
-        # Redirige al dashboard avanzado usando el name='dashboard_avanzado'
         {"name": "Gráficas BI", "url": "dashboard_avanzado", "icon": "fas fa-chart-line", "new_window": False},
         {"model": "auth.User"},
     ],
@@ -148,7 +143,6 @@ JAZZMIN_SETTINGS = {
             "icon": "fas fa-fingerprint",
             "permissions": ["auth.view_user"]
         },
-        # Enlaces corregidos con los nombres de ruta para evitar errores 404
         {"name": "Gráficas BI", "url": "dashboard_avanzado", "icon": "fas fa-chart-pie", "new_window": False},
         {"name": "Ir para a Loja", "url": "index", "icon": "fas fa-store", "new_window": False},
     ],
@@ -175,17 +169,12 @@ JAZZMIN_SETTINGS = {
     "custom_js": None,
     "show_ui_builder": False,
 }
-# ==============================================================================
-# 8. CONFIGURACIÓN DE SEGURIDAD (2FA Y HUELLA) - ACTUALIZADO
-# ==============================================================================
 
-# Identidad del servidor para WebAuthn
+# ==============================================================================
+# 8. CONFIGURACIÓN DE SEGURIDAD (2FA Y HUELLA)
+# ==============================================================================
 TWO_FACTOR_WEBAUTHN_RP_NAME = 'Experfrut'
-
-# IMPORTANTE: El RP_ID debe coincidir con el dominio que usas.
-# Cuando uses ngrok, cámbialo a 'theatrics-facsimile-entrench.ngrok-free.dev'
 TWO_FACTOR_WEBAUTHN_RP_ID = 'theatrics-facsimile-entrench.ngrok-free.dev'
-
 TWO_FACTOR_WEBAUTHN_AUTHENTICATORS = 'two_factor.plugins.webauthn.models.WebAuthnDevice'
 
 TWO_FACTOR_METHODS = (
@@ -200,14 +189,12 @@ TWO_FACTOR_METHOD_LABELS = {
 
 TWO_FACTOR_WEBAUTHN_SETUP_TEMPLATE = 'two_factor/setup.html'
 
-# --- CONFIGURACIÓN PARA TÚNELES HTTPS (NGROK) ---
-# Esto permite que Django confíe en el túnel seguro de ngrok para la biometría
+# --- CONFIGURACIÓN PARA TÚNELES HTTPS Y ENTORNOS DE PRODUCCIÓN ---
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
 
-# Al final de tu archivo settings.py (fuera del diccionario), añade esto:
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
     "footer_small_text": False,
