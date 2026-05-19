@@ -1,0 +1,24 @@
+{
+    "name": "Experfrut Business Intelligence",
+    "short_name": "Experfrut",
+    "start_url": "/dashboard-avanzado/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#0f0f0f",
+    "theme_color": "#28a745",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/static/images/icono-192.png",
+            "type": "image/png",
+            "sizes": "192x192",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/images/icono-512.png",
+            "type": "image/png",
+            "sizes": "512x512",
+            "purpose": "any maskable"
+        }
+    ]
+}
