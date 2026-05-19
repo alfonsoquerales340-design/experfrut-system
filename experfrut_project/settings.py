@@ -1,4 +1,5 @@
 import os
+import dj_database_url
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 
@@ -101,12 +102,10 @@ TEMPLATES = [
 # ==============================================================================
 # 5. BASE DE DATOS Y LOCALIZACIÓN
 # ==============================================================================
-import dj_database_url
-import os
-
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgres://localhost:5432/experfrut')
+        default= 'sqlite:///db.sqlite3',
+        conn_max_age=600
     )
 }
 # ==============================================================================
