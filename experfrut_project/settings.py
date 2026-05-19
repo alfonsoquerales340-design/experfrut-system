@@ -19,7 +19,7 @@ ALLOWED_HOSTS = ['*']
 # Configuración de archivos estáticos
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Configuración de archivos multimedia (imágenes cargadas por usuarios)
 MEDIA_URL = '/media/'
