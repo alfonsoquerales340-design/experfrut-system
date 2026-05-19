@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguridad Experfrut</title>
+    
+    <!-- Bootstrap para el diseño -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #1a1a1a; 
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card-seguridad {
+            background-color: #2d2d2d;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+        /* Estilos para que el formulario de la huella se vea bien */
+        .btn-primary { background-color: #007bff; border: none; padding: 12px 25px; font-weight: bold; }
+        .btn-success { background-color: #28a745; border: none; }
+        .form-control { background-color: #3d3d3d; border: 1px solid #555; color: white; margin-bottom: 1rem; }
+        .form-control:focus { background-color: #444; color: white; border-color: #007bff; box-shadow: none; }
+        label { display: block; margin-bottom: 0.5rem; text-align: left; color: #bbb; }
+        
+        /* Ajuste para el botón de WebAuthn que genera Django */
+        #webauthn-login-button, .webauthn-btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+
+    <!-- BLOQUE CRÍTICO: Aquí Django meterá el JavaScript de la huella -->
+    {% block extra_media %}{% endblock %}
+</head>
+<body>
+    <div class="card-seguridad">
+        <h2 class="mb-4">🍎 Experfrut</h2>
+        
+        <!-- Aquí se inyectará el contenido de setup.html -->
+        {% block content %}
+        {% endblock %}
+        
+    </div>
+
+    <!-- Scripts de Bootstrap opcionales -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

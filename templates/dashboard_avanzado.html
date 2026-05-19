@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="manifest" href="{% static 'js/manifest.json' %}">
+<meta name="theme-color" content="#28a745">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<div class="container-fluid mt-4 px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-white font-weight-bold">
+            <i class="fas fa-chart-line text-success mr-2"></i> Experfrut Business Intelligence
+        </h2>
+        
+        <div class="d-flex align-items-center">
+            <a href="/admin/" class="btn btn-warning btn-sm font-weight-bold mr-3 shadow-sm">
+                <i class="fas fa-user-shield mr-1"></i> ACCEDER AL ADMIN
+            </a>
+
+            <span class="badge badge-dark border border-secondary p-2 text-uppercase" style="letter-spacing: 1px;">
+                <i class="fas fa-calendar-alt mr-1 text-success"></i> {% now "d F, Y" %}
+            </span>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4" style="background-color: #1a1a1a; border-radius: 12px; border: 1px solid #333 !important;">
+        <div class="card-body p-3">
+            <form method="GET" id="filterForm" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="text-muted small font-weight-bold mb-1 ml-1">SUCURSAL</label>
+                    <select name="sucursal" class="form-control custom-input">
+                        <option value="todas">Todas las Sedes</option>
+                        {% for s in sucursales %}
+                        <option value="{{ s.id }}" {% if sucursal_seleccionada == s.id|stringformat:"i" %}selected{% endif %}>{{ s.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="text-muted small font-weight-bold mb-1 ml-1">CATEGORÍA</label>
+                    <select name="categoria" class="form-control custom-input">
+                        <option value="todas">Frutas & Vegetales</option>
+                        <option value="fruta" {% if categoria_seleccionada == 'fruta' %}selected{% endif %}>🍎 Frutas</option>
+                        <option value="vegetal" {% if categoria_seleccionada == 'vegetal' %}selected{% endif %}>🥦 Vegetales</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="text-muted small font-weight-bold mb-1 ml-1">PERÍODO</label>
+                    <select name="escala" class="form-control custom-input">
+                        <option value="hora" {% if escala == 'hora' %}selected{% endif %}>Últimas Horas</option>
+                        <option value="dia" {% if escala == 'dia' %}selected{% endif %}>Últimos 7 Días</option>
+                        <option value="mes" {% if escala == 'mes' %}selected{% endif %}>Resumen Mensual</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-success btn-block shadow-sm font-weight-bold py-2">
+                        <i class="fas fa-sync-alt mr-1"></i> ACTUALIZAR
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-lg border-0" style="background-color: #1a1a1a; border-radius: 15px; border: 1px solid #333 !important;">
+        <div class="card-body p-4">
+            <div style="position: relative; height:60vh; width:100%">
+                <canvas id="graficaMaestra"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ reporte|json_script:"datos-json" }}
+
+<style>
+    body { background-color: #0f0f0f !important; color: #e0e0e0; font-family: 'Segoe UI', Roboto, sans-serif; }
+    .custom-input { 
+        background-color: #262626 !important; 
+        border: 1px solid #444 !important; 
+        color: white !important; 
+        border-radius: 8px !important;
+        height: 42px;
+    }
+    .custom-input:focus { border-color: #28a745 !important; box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important; }
+    .btn-success { background-color: #28a745; border: none; border-radius: 8px; transition: all 0.3s; }
+    .btn-success:hover { background-color: #218838; transform: translateY(-1px); }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('graficaMaestra').getContext('2d');
+
+    const rawData = JSON.parse(document.getElementById('datos-json').textContent);
+
+    const labels = rawData.map(item => item.periodo_display || item.periodo);
+    
+    const ventas = rawData.map(item => parseFloat(item.ganancia_real || item.ventas || 0));
+    const perdidas = rawData.map(item => parseFloat(item.perdidas || 0));
+    const entradas = rawData.map(item => parseFloat(item.entradas || item.compras || 0)); 
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Vendas Netas 🟢',
+                    data: ventas,
+                    borderColor: '#2E7D32',
+                    backgroundColor: 'rgba(46, 125, 50, 0.15)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#2E7D32',
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    fill: true,
+                    tension: 0.35
+                },
+                {
+                    label: 'Investimento Caminhão 🔵',
+                    data: entradas,
+                    borderColor: '#0288D1',
+                    backgroundColor: 'rgba(2, 136, 209, 0.1)', 
+                    borderWidth: 3,
+                    pointBackgroundColor: '#0288D1',
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    fill: true,
+                    tension: 0.35
+                },
+                {
+                    label: 'Mermas / Perdas 🔴',
+                    data: perdidas,
+                    borderColor: '#D32F2F',
+                    backgroundColor: 'rgba(211, 47, 47, 0.08)', 
+                    borderWidth: 2,
+                    pointBackgroundColor: '#D32F2F',
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.35
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { color: '#e0e0e0', font: { size: 12, weight: 'bold' }, padding: 20 }
+                },
+                tooltip: {
+                    backgroundColor: '#1c1c1c',
+                    titleColor: '#2E7D32',
+                    bodyColor: '#fff',
+                    borderColor: '#444',
+                    borderWidth: 1,
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label = label.replace(/[🟢🔴🔵]/g, '') + ': ';
+                            }
+                            label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed.y);
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+                    ticks: { 
+                        color: '#aaa',
+                        callback: function(value) { return 'R$ ' + value.toLocaleString('pt-BR'); }
+                    }
+                },
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.02)' },
+                    ticks: { color: '#aaa', maxRotation: 45, minRotation: 45 }
+                }
+            }
+        }
+    });
+});
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Apunta directo a la raíz de static porque sw.js está allí suelto
+        navigator.serviceWorker.register("{% static 'sw.js' %}")
+            .then(reg => console.log('¡Experfrut PWA registrada con éxito!', reg))
+            .catch(err => console.error('Error al registrar la PWA de Experfrut:', err));
+    });
+}
+</script>
+{% endblock %}

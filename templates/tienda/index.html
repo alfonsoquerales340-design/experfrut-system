@@ -1,0 +1,552 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Experfrut - O Sabor da Natureza</title>
+    
+    <link rel="stylesheet" href="{% static 'tienda/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Selector de Sucursal -->
+<div style="margin: 20px; text-align: right;">
+    <label for="sucursalSelect">🛒 <strong>Sucursal:</strong></label>
+    <select id="sucursalSelect" onchange="location.href='?sucursal=' + this.value;" 
+            style="padding: 10px; border-radius: 8px; border: 1px solid #27ae60; background: white; font-weight: bold;">
+        {% for suc in sucursales %}
+            <option value="{{ suc.id }}" {% if suc.id == sucursal_actual %}selected{% endif %}>
+                {{ suc.nombre }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+    <style>
+        .produtos-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            padding: 20px;
+            justify-content: center;
+            align-items: stretch;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        /* Aquí puedes seguir pegando tus otros estilos .produto, etc. */
+    </style>
+</head>
+<body>
+    {# El csrf_token solo es necesario si vas a usar formularios POST en esta página #}
+    {% csrf_token %}
+
+    <header>
+        <div class="container header-content">
+            <img src="{% static 'tienda/image_0.png' %}" alt="Experfrut Logo" class="logo">
+            
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Buscar produtos..." onkeyup="filterProducts()">
+                <button type="submit"><i class="fa fa-search"></i></button>
+            </div>
+
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#produtos">Hortifruti</a></li>
+                    <li><a href="#sobre">Quem Somos</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="/admin" class="btn-admin" style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 5px;"><i class="fa fa-user-shield"></i> Admin</a></li>
+                    {% else %}
+                        <li><a href="/admin" class="btn-login" style="background: #2c3e50; color: white; padding: 8px 15px; border-radius: 5px;">Entrar</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+   <section id="inicio">
+        <div class="container hero-content">
+            <h1>Frescor que você sente, sabor que você ama.</h1>
+            <p>A Experfrut traz o mejor do campo directamente para você.</p>
+            <a href="#produtos" class="btn-primary">Ver Ofertas</a>
+        </div>
+    </section>
+
+    <section id="produtos">
+        <div class="container">
+            <h2>Nossas Ofertas da Semana</h2>
+            
+
+            <h3 style="margin-top: 40px;"><i class="fa fa-leaf"></i> Legumes e Verduras</h3>
+<div class="grid-vegetais" id="vegetaisGrid">
+    {% for s in stocks %}
+        {% if s.producto.es_vegetal %}
+        <div class="produto card-vegetal" data-id="{{ s.producto.id }}">
+            <div class="img-container-veg" style="width: 100%; height: 150px; overflow: hidden; border-radius: 8px;">
+                <img src="{% if s.producto.imagen %}{{ s.producto.imagen.url }}{% else %}https://via.placeholder.com/300x200{% endif %}" 
+                     style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <h4 class="title-veg" style="font-size: 0.9rem; margin: 10px 0;">{{ s.producto.nombre }}</h4>
+            <p style="color: #27ae60; font-weight: bold;">R$ {{ s.producto.precio }}</p>
+            <p style="font-size: 0.8rem; color: #666;">Disp: {{ s.cantidad_actual }}</p>
+            
+            <button class="btn-cart" 
+                    onclick="abrirModal('{{ s.producto.id }}', '{{ s.producto.nombre }}', '{{ s.producto.precio }}', '{{ sucursal_actual }}')">
+                Pesar agora
+            </button>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<h3 style="margin-top: 40px;"><i class="fa fa-apple-alt"></i> Frutas Frescas</h3>
+<div class="grid-vegetais" id="frutasGrid">
+    {% for s in stocks %}
+        {% if not s.producto.es_vegetal %}
+        <div class="produto card-vegetal" data-id="{{ s.producto.id }}">
+            <div class="img-container-veg" style="width: 100%; height: 150px; overflow: hidden; border-radius: 8px;">
+                <img src="{% if s.producto.imagen %}{{ s.producto.imagen.url }}{% else %}https://via.placeholder.com/300x200{% endif %}" 
+                     style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <h4 class="title-veg" style="font-size: 0.9rem; margin: 10px 0;">{{ s.producto.nombre }}</h4>
+            <p style="color: #27ae60; font-weight: bold;">R$ {{ s.producto.precio }}</p>
+            <p style="font-size: 0.8rem; color: #666;">Disp: {{ s.cantidad_actual }}</p>
+            
+            <button class="btn-cart" 
+                    onclick="abrirModal('{{ s.producto.id }}', '{{ s.producto.nombre }}', '{{ s.producto.precio }}', '{{ sucursal_actual }}')">
+                Pesar agora
+            </button>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+         
+              <div id="balancaModal" class="modal-balanca" style="display:none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center;">
+    
+    <div class="modal-content" style="position: relative; background: white; padding: 25px; border-radius: 12px; max-width: 400px; width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        
+        <button type="button" onclick="cerrarModal()" style="position: absolute; top: 12px; right: 12px; background: #f0f0f0; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 22px; line-height: 1; cursor: pointer; display: flex; justify-content: center; align-items: center; color: #555; transition: background 0.3s;">
+            &times;
+        </button>
+
+        <h3 style="margin-top: 0; margin-bottom: 20px; color: #2c3e50;">
+            <i class="fa fa-balance-scale"></i> Pesagem Experfrut
+        </h3>
+        
+        <input type="hidden" id="modalProductoId">
+        <input type="hidden" id="modalSucursalId">
+        
+        <h4 id="modalProdutoNome" style="color: #333; margin-bottom: 5px;">Produto</h4>
+        <p style="color: #666; margin-bottom: 20px;">
+            Preço por kg: <strong style="color: #27ae60;">R$ <span id="modalProdutoPreco">0.00</span></strong>
+        </p>
+        
+        <div style="margin: 20px 0;">
+            <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #555;">Peso na Balança (kg):</label>
+            <input type="number" id="pesoInput" step="0.01" placeholder="0.00" 
+                   style="width: 100%; padding: 15px; font-size: 1.4rem; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; text-align: center; color: #2c3e50;">
+        </div>
+
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px; border: 1px solid #edf2f7;">
+            <p style="margin:0; font-size: 0.9rem; color: #718096; text-transform: uppercase; letter-spacing: 1px;">Valor Total</p>
+            <h2 id="valorTotal" style="color: #27ae60; margin: 5px 0; font-size: 2rem;">R$ 0,00</h2>
+        </div>
+
+        <button onclick="confirmarSalida()" style="width: 100%; background: #27ae60; color: white; border: none; padding: 16px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2);">
+            <i class="fa fa-check"></i> Confirmar Saída
+        </button>
+    </div>
+</div>
+
+<script>
+    // Usamos una sola variable global para el precio
+    let precioKg = 0;
+
+    // 1. Función para cerrar (Unificada)
+    function cerrarModal() {
+        const modal = document.getElementById('balancaModal');
+        if (modal) {
+            modal.style.setProperty("display", "none", "important");
+            // Limpiamos los campos para que no aparezcan datos viejos la próxima vez
+            document.getElementById('pesoInput').value = "";
+            document.getElementById('valorTotal').innerText = "R$ 0,00";
+        }
+    }
+
+    // 2. Función para abrir (Corregida y Blindada)
+    function abrirModal(id, nombre, precio, sucursalIdParam) {
+        const modal = document.getElementById("balancaModal");
+        
+        if (!modal) {
+            console.error("Error: No se encontró 'balancaModal'. Revisa el ID en tu HTML.");
+            return;
+        }
+
+        // Limpiamos el precio: reemplazamos coma por punto para que JS lo entienda como número
+        // Si el precio ya viene como número, el .replace fallaría, por eso aseguramos con String()
+        let precioLimpio = String(precio).replace(',', '.');
+        precioKg = parseFloat(precioLimpio);
+
+        // Llenamos los datos en el modal
+        document.getElementById('modalProductoId').value = id;
+        document.getElementById('modalSucursalId').value = sucursalIdParam;
+        document.getElementById('modalProdutoNome').innerText = nombre;
+        document.getElementById('modalProdutoPreco').innerText = precioKg.toFixed(2).replace('.', ',');
+
+        // Mostramos el modal usando flex para que el centrado funcione
+        modal.style.setProperty("display", "flex", "important");
+        
+        // Ponemos el foco automáticamente en el input de peso para ganar tiempo
+        setTimeout(() => {
+            document.getElementById('pesoInput').focus();
+        }, 100);
+    }
+
+   // --- CONTINUACIÓN DEL SCRIPT (SEGUNDA PARTE RECONFIGURADA) ---
+
+    // 2. Cálculo en tiempo real mientras escribes el peso
+    // Lo envolvemos en un chequeo para evitar errores si el elemento no existe en algún momento
+    const inputPeso = document.getElementById("pesoInput");
+    if (inputPeso) {
+        inputPeso.addEventListener("input", function() {
+            // Reemplazamos la coma por punto para que parseFloat no falle
+            let valorLimpio = this.value.replace(',', '.');
+            let peso = parseFloat(valorLimpio) || 0;
+            
+            // Calculamos el total usando la variable precioKg definida en la Parte 1
+            let total = peso * precioKg;
+            
+            // Formateamos la salida a moneda brasileña (R$)
+            document.getElementById("valorTotal").innerText = "R$ " + total.toFixed(2).replace('.', ',');
+            
+            console.log("Peso capturado:", peso, "kg | Total: R$", total.toFixed(2));
+        });
+    }
+
+    // 3. Confirmar y enviar a la base de datos
+    function confirmarSalida() {
+        // Capturamos los valores actuales de los inputs
+        const pesoRaw = document.getElementById("pesoInput").value;
+        const productoId = document.getElementById("modalProductoId").value;
+        const sucursalId = document.getElementById("modalSucursalId").value;
+        
+        // Limpieza de peso: convertimos coma en punto antes de validar
+        const pesoLimpio = String(pesoRaw).replace(',', '.');
+        const pesoNumerico = parseFloat(pesoLimpio);
+
+        // Validación de peso: comprobamos que sea un número real y mayor a cero
+        if (!pesoLimpio || isNaN(pesoNumerico) || pesoNumerico <= 0) {
+            alert("Por favor, insira um peso válido.");
+            return;
+        }
+
+        // Aquí ya tienes los datos listos para el fetch a tu backend
+        console.log("🚀 Enviando salida:", {
+            productoId: productoId,
+            sucursalId: sucursalId,
+            peso: pesoNumerico,
+            valorTotal: (pesoNumerico * precioKg).toFixed(2)
+        });
+
+        // NOTA: Aquí iría tu fetch/ajax para guardar el movimiento en Django
+       // --- FINAL DEL SCRIPT (TERCERA PARTE INTEGRADA) ---
+
+    // Diagnóstico rápido para desarrollo
+    console.log("📤 Preparando envío: Sucursal " + sucursalId + " | Producto " + productoId + " | Peso " + pesoNumerico);
+
+    // Preparamos los datos para enviar a Django
+    const formData = new FormData();
+    formData.append('peso_balanza', pesoLimpio); 
+    formData.append('producto_id', productoId);
+    formData.append('sucursal_id', sucursalId); 
+    // Aseguramos que el token se capture correctamente desde el template de Django
+    const csrfToken = '{{ csrf_token }}';
+    formData.append('csrfmiddlewaretoken', csrfToken);
+
+    // Enviamos la información al servidor
+    fetch('/registrar-salida/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            // Si el servidor responde 404 o 500, lanzamos error
+            throw new Error('Erro na resposta do servidor (Status: ' + response.status + ')');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            // Confirmación visual antes de recargar
+            alert("✅ Venda registrada com sucesso!");
+            
+            // Cerramos el modal antes de recargar para evitar que se quede "pegado"
+            cerrarModal();
+            
+            // Recargamos para actualizar los niveles de stock en la pantalla
+            location.reload(); 
+        } else {
+            // Mensaje de error controlado desde Django (ej. Stock insuficiente)
+            alert("⚠️ " + (data.message || "Erro desconhecido no servidor"));
+        }
+    })
+    
+} // Cerramos la función confirmarSalida
+
+    // --- CONTINUACIÓN Y CIERRE DE confirmarSalida ---
+        
+        // Mensaje de diagnóstico
+        console.log("Enviando datos a Experfrut...");
+
+        fetch('/registrar-salida/', { 
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}' // Refuerzo de seguridad para Django
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Error en el servidor');
+            return response.json();
+        })
+        .then(data => {
+            // Unificamos para que acepte tanto 'mensaje' como 'message'
+            if (data.status === 'success') {
+                alert("✅ " + (data.mensaje || data.message || "Venda registrada!"));
+                cerrarModal(); // Cerramos antes de recargar
+                location.reload(); 
+            } else {
+                alert("❌ Erro: " + (data.message || data.mensaje || "Erro no servidor"));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Erro de conexão. Verifique se o servidor está ativo (Ngrok).");
+        });
+     // AQUÍ CIERRA confirmarSalida
+
+    // --- LÓGICA DEL BUSCADOR (Para que el mensaje #noResults funcione) ---
+    function filtrarProductos() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let cards = document.getElementsByClassName('card-producto');
+        let encontrados = 0;
+
+        for (let i = 0; i < cards.length; i++) {
+            let nombre = cards[i].getAttribute('data-nombre').toLowerCase();
+            if (nombre.includes(input)) {
+                cards[i].style.display = "";
+                encontrados++;
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+
+        // Muestra u oculta el mensaje de "No resultados"
+        const noResults = document.getElementById('noResults');
+        if (encontrados === 0) {
+            noResults.style.display = "block";
+        } else {
+            noResults.style.display = "none";
+        }
+    }
+</script>
+
+<p id="noResults" style="display: none; text-align: center; margin-top: 30px; font-weight: bold; color: #999; background: #f9f9f9; padding: 20px; border-radius: 10px; border: 1px dashed #ccc;">
+    <i class="fa fa-search"></i> Nenhum produto encontrado em Experfrut.
+</p>
+
+<style>
+    /* Estilos del grid y tarjetas */
+    .grid-vegetais {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2 columnas en móvil para mejor visibilidad */
+        gap: 12px;
+        padding: 15px;
+        justify-content: center;
+    }
+
+    .card-vegetal {
+        background: white;
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    /* Ajustes para pantallas grandes (PC/Tablet) */
+    @media (min-width: 768px) {
+        .grid-vegetais {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+            gap: 20px;
+        }
+        .img-container-veg {
+            height: 150px !important; 
+        }
+        .title-veg {
+            font-size: 1.1rem !important;
+        }
+    }
+
+    /* Estilo para el Modal (Asegura que se vea encima de todo) */
+    .modal-balanca {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6);
+        display: none; /* Se activa con JS */
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+</style>
+
+<script>
+    // 1. Variables globales
+    let precioActual = 0;
+
+    // 2. Buscador de productos (Mantenemos tu lógica)
+    function filterProducts() {
+        let filter = document.getElementById("searchInput").value.toLowerCase();
+        let products = document.getElementsByClassName("produto");
+        let found = false;
+
+        for (let p of products) {
+            let name = p.getAttribute("data-name") ? p.getAttribute("data-name").toLowerCase() : "";
+            if (name.includes(filter)) {
+                p.style.display = "";
+                found = true;
+            } else {
+                p.style.display = "none";
+            }
+        }
+        
+        let noResultsMsg = document.getElementById("noResults");
+        if (noResultsMsg) {
+            noResultsMsg.style.display = found ? "none" : "block";
+        }
+    }
+
+    // 3. Lógica del Modal (Actualizada para Sucursales)
+    function abrirModal(id, nombre, precio, sucursalId) {
+        const modal = document.getElementById("balancaModal");
+        if (!modal) {
+            alert("Erro: Modal não encontrado.");
+            return;
+        }
+
+        // Convertir precio
+        precioActual = parseFloat(String(precio).replace(',', '.'));
+        
+        // Capturar Sede (de los parámetros o de la URL)
+        const urlParams = new URLSearchParams(window.location.search);
+        const idSede = sucursalId || urlParams.get('sucursal') || 1;
+
+        // Llenar campos ocultos
+        document.getElementById("modalProductoId").value = id;
+        document.getElementById("modalSucursalId").value = idSede; // ¡CRÍTICO!
+        
+        document.getElementById("modalProdutoNome").innerText = nombre;
+        document.getElementById("modalProdutoPreco").innerText = precio;
+        document.getElementById("pesoInput").value = "";
+        document.getElementById("valorTotal").innerText = "R$ 0,00";
+        
+        console.log("Sede cargada en el modal:", idSede);
+        modal.style.display = "flex";
+    }
+
+    function cerrarModal() {
+        const modal = document.getElementById("balancaModal");
+        if (modal) modal.style.display = "none";
+    }
+
+    // 4. Cálculo en tiempo real (Optimizado)
+    document.addEventListener("DOMContentLoaded", function() {
+        const pesoInput = document.getElementById("pesoInput");
+        if (pesoInput) {
+            pesoInput.addEventListener("input", function() {
+                let valor = this.value.replace(',', '.');
+                let peso = parseFloat(valor) || 0;
+                let total = peso * precioActual;
+                document.getElementById("valorTotal").innerText = "R$ " + total.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            });
+        }
+    });
+
+    // 5. Confirmar Salida (La versión que SI separa sucursales)
+    function confirmarSalida() {
+        const peso = document.getElementById("pesoInput").value;
+        const productoId = document.getElementById("modalProductoId").value;
+        const sucursalId = document.getElementById("modalSucursalId").value; 
+        const csrfElement = document.querySelector('[name=csrfmiddlewaretoken]');
+
+        if (!peso || peso <= 0) {
+            alert("Por favor, insira um peso válido.");
+            return;
+        }
+
+        const datos = new FormData();
+        datos.append('peso_balanza', peso.replace(',', '.'));
+        datos.append('producto_id', productoId);
+        datos.append('sucursal_id', sucursalId); // <--- Esto es lo que faltaba en tu código
+        datos.append('csrfmiddlewaretoken', csrfElement ? csrfElement.value : '{{ csrf_token }}');
+
+        fetch('/registrar-salida/', {
+            method: 'POST',
+            body: datos
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert("✅ Venda registrada na Sucursal " + sucursalId + "!");
+                location.reload();
+            } else {
+                alert("Erro: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Erro de conexão.");
+        });
+
+    
+    
+
+    </script>
+    <!-- FOOTER SOCIAL (COMO EN TU CAPTURA) -->
+<footer style="margin-top: 50px; padding: 20px; background: #f9f9f9;">
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+        <!-- Instagram -->
+        <a href="#" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); border-radius: 15px; padding: 10px; text-align: center; color: white; text-decoration: none;">
+            <i class="fab fa-instagram" style="font-size: 1.5rem;"></i>
+            <span style="display: block; font-size: 0.5rem; margin-top: 5px;">@Experfrut_BH</span>
+        </a>
+        <!-- WhatsApp -->
+        <a href="#" style="background: #25D366; border-radius: 15px; padding: 10px; text-align: center; color: white; text-decoration: none;">
+            <i class="fab fa-whatsapp" style="font-size: 1.5rem;"></i>
+            <span style="display: block; font-size: 0.5rem; margin-top: 5px;">Pedir Agora</span>
+        </a>
+        <!-- Facebook -->
+        <a href="#" style="background: #3b5998; border-radius: 15px; padding: 10px; text-align: center; color: white; text-decoration: none;">
+            <i class="fab fa-facebook-f" style="font-size: 1.5rem;"></i>
+            <span style="display: block; font-size: 0.5rem; margin-top: 5px;">/ExperfrutOficial</span>
+        </a>
+        <!-- X -->
+        <a href="#" style="background: #00acee; border-radius: 15px; padding: 10px; text-align: center; color: white; text-decoration: none;">
+            <i class="fab fa-x-twitter" style="font-size: 1.5rem;"></i>
+            <span style="display: block; font-size: 0.5rem; margin-top: 5px;">/Experfrut</span>
+        </a>
+     </div>      

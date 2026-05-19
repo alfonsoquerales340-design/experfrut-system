@@ -1,0 +1,322 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head><!-- Meta etiquetas para que parezca una App -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<link rel="icon" href="tu-logo-fruta.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experfrut - O Sabor da Natureza na Sua Mesa</title>
+    <link rel="stylesheet" href="{% static 'tienda/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <!-- 1. El Logo primero -->
+            <img src="{% static 'tienda/image_0.png' %}" alt="Experfrut Logo" class="logo">
+            
+            <!-- 2. El Buscador después -->
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Buscar produtos..." onkeyup="filterProducts()">
+                <button type="submit"><i class="fa fa-search"></i></button>
+            </div>
+
+            <!-- 3. El Menú al final -->
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#produtos">Hortifruti</a></li>
+                    <li><a href="#videos">Nossa Colheita</a></li>
+                    <li><a href="#sobre">Quem Somos</a></li>
+                    <li><a href="#contato">Contato</a></li>
+                    
+                    {% if user.is_authenticated %}
+                        <li><a href="/admin" class="btn-admin" style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 5px; font-weight: bold;"><i class="fa fa-user-shield"></i> Painel Admin</a></li>
+                    {% else %}
+                        <li><a href="/admin" class="btn-login" style="background: #2c3e50; color: white; padding: 8px 15px; border-radius: 5px;"><i class="fa fa-sign-in-alt"></i> Entrar</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div><!-- Cargar Chart.js desde CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        </div>
+    </div>
+</section>
+    </header>
+
+    <section id="inicio">
+        <div class="container hero-content">
+            <h1>Frescor que você sente, sabor que você ama.</h1>
+            <p>A Experfrut traz o mejor do campo diretamente para sua casa. Frutas, legumes e verduras selecionados com carinho.</p>
+            <a href="#produtos" class="btn-primary">Ver Ofertas</a>
+        </div>
+    </section>
+
+    <section id="produtos">
+        <div class="container">
+            <h2>Nossas Ofertas da Semana</h2>
+
+            <div class="product-category">
+                <h3><i class="fa fa-apple-alt"></i> Frutas Frescas</h3>
+                <div class="produtos-grid" id="frutasGrid">
+                    {% for p in productos %}
+                        {% if not p.es_vegetal and p.activo %}
+                        <div class="produto fruta" data-name="{{ p.nombre|lower }}" data-price="{{ p.precio|stringformat:'.2f' }}">
+                            <div class="produto-img-container">
+                                {% if p.imagen %}
+                                    <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/300x200?text={{ p.nombre }}" alt="{{ p.nombre }}">
+                                {% endif %}
+                            </div>
+                            <h4 class="product-title">{{ p.nombre }} ({{ p.unidad }})</h4>
+                            <p class="preco">R$ <span class="price-value">{{ p.precio }}</span></p>
+                            <button class="btn-cart">Adicionar</button>
+                        </div>
+                        {% endif %}
+                    {% empty %}
+                        <p>Não há frutas em oferta no momento.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="product-category">
+                <h3><i class="fa fa-carrot"></i> Legumes e Verduras</h3>
+                <div class="produtos-grid" id="vegetaisGrid">
+                    {% for p in productos %}
+                        {% if p.es_vegetal and p.activo %}
+                        <div class="produto vegetal" data-name="{{ p.nombre|lower }}" data-price="{{ p.precio|stringformat:'.2f' }}">
+                            <div class="produto-img-container">
+                                {% if p.imagen %}
+                                    <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/300x200?text={{ p.nombre }}" alt="{{ p.nombre }}">
+                                {% endif %}
+                            </div>
+                            <h4 class="product-title">{{ p.nombre }} ({{ p.unidad }})</h4>
+                            <p class="preco">R$ <span class="price-value">{{ p.precio }}</span></p>
+                            <button class="btn-cart">Adicionar</button>
+                        </div>
+                        {% endif %}
+                    {% empty %}
+                        <p>Não há vegetais em oferta no momento.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <p id="noResults" style="display: none; text-align: center; font-style: italic; color: #666; margin-top: 20px;">Nenhum produto encontrado.</p>
+        </div>
+    </section>
+
+    <section id="videos">
+        <div class="container">
+            <h2>Do Campo à Experfrut</h2>
+            <div class="videos-grid">
+                <div class="video-item">
+                    <div class="video-wrapper">
+                        <video controls>
+                            <source src="{% static 'tienda/video1.mp4' %}" type="video/mp4">
+                            Seu navegador não suporta vídeos HTML5.
+                        </video>
+                    </div>
+                    <h4>Seleção Rigorosa</h4>
+                </div>
+                <div class="video-item">
+                    <div class="video-wrapper">
+                        <video controls>
+                            <source src="{% static 'tienda/video2.mp4' %}" type="video/mp4">
+                            Seu navegador não suporta vídeos HTML5.
+                        </video>
+                    </div>
+                    <h4>Logística Ágil</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sobre">
+        <div class="container">
+            <h2>Experfrut: Paixão por Frescor</h2>
+            <p>Nascemos do desejo de levar alimentos saudáveis e cheios de sabor para todas as mesas...</p>
+        </div>
+    </section>
+
+    <section id="contato">
+        <div class="container">
+            <h2>Fale Conosco / Faça seu Pedido</h2>
+            <div class="contato-info">
+                <p><strong>WhatsApp:</strong> (XX) XXXXX-XXXX</p>
+                <p><strong>Email:</strong> contacto@experfrut.com.br</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Experfrut. Todos os direitos reservados. Feito com ❤️ em Minas Gerais.</p>
+        </div>
+    </footer>
+
+    <!-- Modal de Calculadora de Balança -->
+    <div id="balancaModal" class="modal-balanca" style="display:none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3><i class="fa fa-balance-scale"></i> Pesagem Experfrut</h3>
+            <div class="modal-body">
+                <h4 id="modalProdutoNome">Produto</h4>
+                <p>Preço por unidade/kg: <strong>R$ <span id="modalProdutoPreco">0.00</span></strong></p>
+                
+                <div class="input-group">
+                    <label for="pesoInput">Peso medido na balança (kg):</label>
+                    <input type="number" id="pesoInput" step="0.01" placeholder="0.00" min="0">
+                </div><!-- Botón pequeño para abrir gráficas -->
+<button onclick="abrirGrafica()" class="btn-stats" style="position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #FF9800; color: white; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 999;">
+    <i class="fa fa-chart-line" style="font-size: 24px;"></i>
+</button>
+
+<!-- Modal de Gráficas (Estilo igual a la balanza) -->
+<div id="graficaModal" class="modal-balanca" style="display:none;">
+    <div class="modal-content" style="max-width: 600px;"> <!-- Un poco más ancho para la gráfica -->
+        <span class="close-modal" onclick="cerrarGrafica()">&times;</span>
+        <h3><i class="fa fa-chart-bar"></i> Relatório de Vendas</h3>
+        
+        <div class="modal-body">
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
+                <canvas id="graficaVentas"></canvas>
+            </div>
+            
+            <button onclick="cerrarGrafica()" class="btn-primary" style="width: 100%;">Fechar</button>
+        </div>
+    </div>
+</div>
+                          
+                <div class="total-resultado">
+                    <p>Valor Total:</p>
+                    <h2 id="valorTotal">R$ 0.00</h2>
+                </div>
+                
+                <button id="confirmarVenta" class="btn-primary" style="width: 100%; border: none; padding: 15px; border-radius: 30px; font-weight: bold; cursor: pointer;">
+                    <i class="fa fa-check-circle"></i> Confirmar Saída
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterProducts() {
+            var input = document.getElementById("searchInput");
+            var filter = input.value.toLowerCase().trim();
+            var products = document.getElementsByClassName("produto");
+            var noResults = document.getElementById("noResults");
+            var foundAny = false;
+
+            for (var i = 0; i < products.length; i++) {
+                var name = products[i].getAttribute("data-name") || "";
+                var price = products[i].getAttribute("data-price") || "";
+                
+                if (name.includes(filter) || price.includes(filter)) {
+                    products[i].style.display = "";
+                    foundAny = true;
+                } else {
+                    products[i].style.display = "none";
+                }
+            }
+            noResults.style.display = foundAny || filter === "" ? "none" : "block";
+        }
+
+        const modal = document.getElementById("balancaModal");
+        const pesoInput = document.getElementById("pesoInput");
+        const precioModal = document.getElementById("modalProdutoPreco");
+        const totalH2 = document.getElementById("valorTotal");
+        let precioActual = 0;
+
+        document.querySelectorAll('.btn-cart').forEach(button => {
+            button.onclick = function() {
+                const card = this.closest('.produto');
+                const nombre = card.querySelector('.product-title').innerText;
+                precioActual = parseFloat(card.getAttribute('data-price').replace(',', '.'));
+                
+                document.getElementById("modalProdutoNome").innerText = nombre;
+                precioModal.innerText = precioActual.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                
+                pesoInput.value = "";
+                totalH2.innerText = "R$ 0,00";
+                modal.style.display = "flex";
+                setTimeout(() => pesoInput.focus(), 100);
+            };
+        });
+
+        pesoInput.oninput = function() {
+            const peso = parseFloat(this.value) || 0;
+            const total = peso * precioActual;
+            totalH2.innerText = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        };
+
+        document.querySelector('.close-modal').onclick = () => modal.style.display = "none";
+        
+        window.onclick = (event) => { 
+            if (event.target == modal) modal.style.display = "none"; 
+        };
+
+        document.getElementById('confirmarVenta').onclick = function() {
+            if (pesoInput.value > 0) {
+                alert("Venda registrada com sucesso no sistema Experfrut!");
+                modal.style.display = "none";
+            } else {
+                alert("Por favor, insira o peso medido.");
+            }
+        };
+        let miGrafica; // Variable global para la gráfica
+
+function abrirGrafica() {
+    document.getElementById("graficaModal").style.display = "flex";
+    
+    // Si la gráfica ya existe, la destruimos para que no se duplique al reabrir
+    if (miGrafica) { miGrafica.destroy(); }
+
+    const ctx = document.getElementById('graficaVentas').getContext('2d');
+    
+    // Datos de ejemplo (Luego puedes traerlos de Django)
+    const labels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+    const valores = [800, 1200, 950, 1700, 2100, 3200, 1500];
+
+    miGrafica = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Vendas diárias (R$)',
+                data: valores,
+                borderColor: '#2E7D32',
+                backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+}
+
+function cerrarGrafica() {
+    document.getElementById("graficaModal").style.display = "none";
+}
+    </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js') // Asegúrate de que la ruta sea correcta
+        .then(reg => console.log('Service Worker registrado con éxito', reg))
+        .catch(err => console.log('Error al registrar el Service Worker', err));
+    });
+  }
+</script>
+</body>
+</html>
