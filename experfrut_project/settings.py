@@ -1,7 +1,7 @@
 import os
 import dj_database_url
 from pathlib import Path
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as _
 
 # ==============================================================================
 # 1. CONFIGURACIÓN BÁSICA Y RUTAS
