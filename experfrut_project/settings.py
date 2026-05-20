@@ -18,8 +18,8 @@ ALLOWED_HOSTS = ['*', 'web-production-c14c2.up.railway.app', 'localhost', '127.0
 
 # Configuración del proyecto interno de Django (¡CORREGIDO PARA TU PROYECTO ACTUAL!)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-ROOT_URLCONF = 'experfrut_project.urls'
-WSGI_APPLICATION = 'experfrut_project.wsgi.application'
+ROOT_URLCONF = 'app.urls'
+WSGI_APPLICATION = 'app.wsgi.application'
 
 # Confianza para túneles externos y Railway
 CSRF_TRUSTED_ORIGINS = [
