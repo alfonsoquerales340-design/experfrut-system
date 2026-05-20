@@ -8,5 +8,4 @@ pip install -r requirements.txt
 # 2. Recopilar los archivos estáticos
 python manage.py collectstatic --no-input
 
-# 3. Aplicar las migraciones de la base de datos
-python manage.py migrate
+
