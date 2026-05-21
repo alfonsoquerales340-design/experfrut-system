@@ -3,28 +3,21 @@ from pathlib import Path
 import dj_database_url
 from django.utils.translation import gettext_lazy as _
 
-# Rutas del proyecto
+# 1. CONFIGURACIÓN BASE
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Seguridad básica
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-5#4*^3zx(xjix)4nqmpyq*$=w#t%_#yl&-5m(s^ov7lilr9ybk')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-tu-clave-secreta-aqui')
 
-# Configuración de DEBUG dinámico
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-# Dominio y Hosts permitidos
-ALLOWED_HOSTS = ['*', 'web-production-c14c2.up.railway.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
-# Configuración del proyecto interno (Apuntando a la carpeta real 'app')
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-ROOT_URLCONF = 'app.urls'
-WSGI_APPLICATION = 'app.wsgi.application'
-
-# ==============================================================================
-# 2. DEFINICIÓN DE APLICACIONES
-# ==============================================================================
+# 2. APLICACIONES INSTALADAS
 INSTALLED_APPS = [
-    'jazzmin',  # <-- SIEMPRE primero para cambiar el diseño del admin
+    # Interfaz de administración moderna (Debe ir ANTES de django.contrib.admin)
+    'jazzmin',
+    
+    # Aplicaciones nativas de Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -32,28 +25,30 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Tus aplicaciones e integraciones de seguridad
-    'tienda',
+    # Librerías de seguridad y autenticación
     'django_otp',
     'django_otp.plugins.otp_totp',
     'axes',
+    
+    # Tus aplicaciones locales (Módulos de Experfrut)
+    'app',
 ]
 
-# ==============================================================================
-# 3. MIDDLEWARES (Orden estricto de ejecución)
-# ==============================================================================
+# 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Soporte de archivos estáticos
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Manejo eficiente de archivos estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_otp.middleware.OTPMiddleware',  # Verificación en dos pasos
+    'django_otp.middleware.OTPMiddleware',         # Seguridad de doble factor
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'axes.middleware.AxesMiddleware',  # Protección contra fuerza bruta
+    'axes.middleware.AxesMiddleware',              # Bloqueo de ataques de fuerza bruta
 ]
+
+ROOT_URLCONF = 'app.urls'
 
 TEMPLATES = [
     {
@@ -71,89 +66,60 @@ TEMPLATES = [
     },
 ]
 
-# ==============================================================================
-# 5. BASE DE DATOS
-# ==============================================================================
+WSGI_APPLICATION = 'app.wsgi.application'
+
+# 4. BASE DE DATOS POSTGRESQL (PRODUCCIÓN)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
+        default=DATABASE_URL,
         conn_max_age=600,
-        ssl_require=False if os.environ.get('LOCAL_DEVELOPMENT') else True
+        ssl_require=True
     )
 }
 
-# Conexiones confiables para CSRF (Railway y Ngrok)
-CSRF_TRUSTED_ORIGINS = [
-    'https://theatrics-facsimile-entrench.ngrok-free.dev',
-    'https://web-production-c14c2.up.railway.app'
+# 5. VALIDACIÓN DE CONTRASEÑAS
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# ==============================================================================
-# 6. ARCHIVOS ESTÁTICOS Y MULTIMEDIA
-# ==============================================================================
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Idioma y Zona Horaria
-LANGUAGE_CODE = 'pt-br'
+# 6. CONFIGURACIÓN DE IDIOMA Y HORARIO
+LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
-# ==============================================================================
-# 7. CONFIGURACIÓN DE JAZZMIN (Interfaz Gráfica)
-# ==============================================================================
+# 7. ARCHIVOS ESTÁTICOS (ESTRELLA PARA DESPLIEGUE)
+STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 8. CONFIGURACIÓN EXTRA DE SEGURIDAD (AXES)
+AXES_FAILURE_LIMIT = 5
+AXES_COOLDOWN = 1  # 1 hora de bloqueo si fallan intentos
+AXES_LOCKOUT_TEMPLATE = 'axes/lockout.html'
+
+# 9. PERSONALIZACIÓN VISUAL (JAZZMIN RESUMIDO)
 JAZZMIN_SETTINGS = {
     "site_title": "Experfrut Admin",
     "site_header": "Experfrut",
     "site_brand": "Experfrut Management",
-    "welcome_sign": "Bem-vindo ao Experfrut",
+    "welcome_sign": "Bienvenido al Sistema de Gestión de Experfrut",
     "copyright": "Experfrut Ltd",
     "search_model": ["auth.User"],
     "user_avatar": None,
-
     "topmenu_links": [
-        {"name": "Ir para a Loja", "url": "index", "icon": "fas fa-store", "new_window": False},
-        {"name": "Gráficas BI", "url": "dashboard_avanzado", "icon": "fas fa-chart-line", "new_window": False},
-        {"model": "auth.User"},
+        {"name": "Inicio", "url": "admin:index", "permissions": ["auth.view_user"]},
     ],
-
-    "usermenu_links": [
-        {"name": "Gráficas BI", "url": "dashboard_avanzado", "icon": "fas fa-chart-pie", "new_window": False},
-        {"name": "Ir para a Loja", "url": "index", "icon": "fas fa-store", "new_window": False},
-    ],
-
     "show_sidebar": True,
     "navigation_expanded": True,
-    "hide_apps": [],
-    "hide_models": [],
-    "icons": {
-        "auth": "fas fa-users-cog",
-        "auth.user": "fas fa-user",
-        "auth.Group": "fas fa-users",
-    },
-    "default_icon_parents": "fas fa-chevron-circle-right",
-    "default_icon_children": "fas fa-circle",
-    "related_modal_active": False,
-    "custom_css": None,
-    "custom_js": None,
-    "show_ui_builder": False,
+    "theme": "default",
 }
 
-JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
-}
-
-# ==============================================================================
-# 8. CONFIGURACIÓN DE SEGURIDAD AVANZADA (HTTPS / PROXY)
-# ==============================================================================
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
