@@ -48,7 +48,7 @@ MIDDLEWARE = [
     'axes.middleware.AxesMiddleware',              # Bloqueo de ataques de fuerza bruta
 ]
 
-ROOT_URLCONF = 'app.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -66,7 +66,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'app.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 # 4. BASE DE DATOS POSTGRESQL (PRODUCCIÓN)
 DATABASE_URL = os.environ.get('DATABASE_URL')
