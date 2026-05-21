@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn experfrut_project.wsgi --log-file -
+web: gunicorn --chdir /app app.wsgi --log-file -
