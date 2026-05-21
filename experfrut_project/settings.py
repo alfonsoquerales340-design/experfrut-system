@@ -1,38 +1,30 @@
 import os
-import dj_database_url
 from pathlib import Path
+import dj_database_url
 from django.utils.translation import gettext_lazy as _
 
-# ==============================================================================
-# 1. CONFIGURACIÓN BÁSICA Y RUTAS
-# ==============================================================================
+# Rutas del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-5#4*^3zx(xjix)4nqmpyq*$=w#t%_#yl&-5m(s^ov7lilr9ybk'
+# Seguridad básica
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-5#4*^3zx(xjix)4nqmpyq*$=w#t%_#yl&-5m(s^ov7lilr9ybk')
 
-# El DEBUG dinámico permite desarrollo local y producción automática en Railway
+# Configuración de DEBUG dinámico
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Autorizar Railway y Ngrok de forma dinámica y segura
+# Dominio y Hosts permitidos
 ALLOWED_HOSTS = ['*', 'web-production-c14c2.up.railway.app', 'localhost', '127.0.0.1']
 
-# Configuración del proyecto interno de Django (¡CORREGIDO PARA TU PROYECTO ACTUAL!)
+# Configuración del proyecto interno (Apuntando a la carpeta real 'app')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ROOT_URLCONF = 'app.urls'
 WSGI_APPLICATION = 'app.wsgi.application'
 
-# Confianza para túneles externos y Railway
-CSRF_TRUSTED_ORIGINS = [
-    'https://theatrics-facsimile-entrench.ngrok-free.dev',
-    'https://web-production-c14c2.up.railway.app'
-]
-
 # ==============================================================================
-# 2. DEFINICIÓN DE APLICACIONES (¡CORREGIDO EL ORDEN PARA JAZZMIN!)
+# 2. DEFINICIÓN DE APLICACIONES
 # ==============================================================================
 INSTALLED_APPS = [
-    'jazzmin',  # <-- Jazzmin SIEMPRE debe ir antes de django.contrib.admin
-    'tienda',
+    'jazzmin',  # <-- SIEMPRE primero para cambiar el diseño del admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,47 +32,33 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    # Tus aplicaciones e integraciones de seguridad
+    'tienda',
     'django_otp',
-    'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
-    'two_factor',
-    'two_factor.plugins.webauthn',
     'axes',
 ]
 
 # ==============================================================================
-# 3. MIDDLEWARE Y AUTENTICACIÓN
+# 3. MIDDLEWARES (Orden estricto de ejecución)
 # ==============================================================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Soporte eficiente para archivos estáticos
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Soporte de archivos estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_otp.middleware.OTPMiddleware',
+    'django_otp.middleware.OTPMiddleware',  # Verificación en dos pasos
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'axes.middleware.AxesMiddleware',
+    'axes.middleware.AxesMiddleware',  # Protección contra fuerza bruta
 ]
 
-AUTHENTICATION_BACKENDS = [
-    'axes.backends.AxesStandaloneBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]
-
-LOGIN_URL = 'two_factor:login'
-LOGIN_REDIRECT_URL = '/'
-
-# ==============================================================================
-# 4. TEMPLATES
-# ==============================================================================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'tienda', 'templates'),
-        ], 
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -94,7 +72,7 @@ TEMPLATES = [
 ]
 
 # ==============================================================================
-# 5. BASE DE DATOS OPTIMIZADA PARA LOCAL Y PRODUCTION
+# 5. BASE DE DATOS
 # ==============================================================================
 DATABASES = {
     'default': dj_database_url.config(
@@ -104,125 +82,78 @@ DATABASES = {
     )
 }
 
+# Conexiones confiables para CSRF (Railway y Ngrok)
+CSRF_TRUSTED_ORIGINS = [
+    'https://theatrics-facsimile-entrench.ngrok-free.dev',
+    'https://web-production-c14c2.up.railway.app'
+]
+
 # ==============================================================================
-# 6. ARCHIVOS ESTÁTICOS Y MULTIMEDIA (Limpio y unificado sin duplicados)
+# 6. ARCHIVOS ESTÁTICOS Y MULTIMEDIA
 # ==============================================================================
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Almacenamiento optimizado para WhiteNoise en producción
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Idioma y Zona Horaria
+LANGUAGE_CODE = 'pt-br'
+TIME_ZONE = 'America/Sao_Paulo'
+USE_I18N = True
+USE_TZ = True
 
 # ==============================================================================
-# 7. JAZZMIN SETTINGS
+# 7. CONFIGURACIÓN DE JAZZMIN (Interfaz Gráfica)
 # ==============================================================================
 JAZZMIN_SETTINGS = {
     "site_title": "Experfrut Admin",
     "site_header": "Experfrut",
-    "site_brand": "Experfrut",
+    "site_brand": "Experfrut Management",
     "welcome_sign": "Bem-vindo ao Experfrut",
     "copyright": "Experfrut Ltd",
-    "search_model": ["auth.User", "tienda.Hortifruti"],
-    
-    # 1. MENÚ SUPERIOR (Navegación principal)
+    "search_model": ["auth.User"],
+    "user_avatar": None,
+
     "topmenu_links": [
-        {"name": "Ir para a Loja", "url": "index", "permissions": ["auth.view_user"], "icon": "fas fa-store", "new_window": False},
+        {"name": "Ir para a Loja", "url": "index", "icon": "fas fa-store", "new_window": False},
         {"name": "Gráficas BI", "url": "dashboard_avanzado", "icon": "fas fa-chart-line", "new_window": False},
         {"model": "auth.User"},
     ],
 
-    # 2. MENÚ DE USUARIO (Desplegable de Account)
     "usermenu_links": [
-        {
-            "name": "Configurar Biometria (Digital)", 
-            "url": "/account/two_factor/setup/", 
-            "icon": "fas fa-fingerprint",
-            "permissions": ["auth.view_user"]
-        },
         {"name": "Gráficas BI", "url": "dashboard_avanzado", "icon": "fas fa-chart-pie", "new_window": False},
         {"name": "Ir para a Loja", "url": "index", "icon": "fas fa-store", "new_window": False},
     ],
 
     "show_sidebar": True,
-    "navigation_expanded": False,
-
-    # 3. ICONOS DEL MENÚ LATERAL
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
     "icons": {
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
-        "tienda.Hortifruti": "fas fa-apple-alt",
-        "tienda.MovimientoInventario": "fas fa-exchange-alt", 
-        "tienda.StockPorSucursal": "fas fa-map-marker-alt",
-        "two_factor.phonedevice": "fas fa-mobile-alt",
     },
-
-    "changeform_format": "horizontal_tabs",
-    "related_modal_active": True,
-    "use_google_fonts_cdn": True,
-
-    "custom_css": "tienda/css/custom_admin.css", 
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": False,
+    "custom_css": None,
     "custom_js": None,
     "show_ui_builder": False,
 }
 
-# ==============================================================================
-# 8. CONFIGURACIÓN DE SEGURIDAD (2FA Y HUELLA)
-# ==============================================================================
-TWO_FACTOR_WEBAUTHN_RP_NAME = 'Experfrut'
-TWO_FACTOR_WEBAUTHN_RP_ID = 'theatrics-facsimile-entrench.ngrok-free.dev'
-TWO_FACTOR_WEBAUTHN_AUTHENTICATORS = 'two_factor.plugins.webauthn.models.WebAuthnDevice'
-
-TWO_FACTOR_METHODS = (
-    'generator',
-    'webauthn',
-)
-
-TWO_FACTOR_METHOD_LABELS = {
-    'generator': _('Código generado por aplicación'),
-    'webauthn': _('Huella digital / Llave de seguridad'),
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
 }
 
-TWO_FACTOR_WEBAUTHN_SETUP_TEMPLATE = 'two_factor/setup.html'
-
-# --- CONFIGURACIÓN PARA TÚNELES HTTPS Y ENTORNOS DE PRODUCCIÓN ---
+# ==============================================================================
+# 8. CONFIGURACIÓN DE SEGURIDAD AVANZADA (HTTPS / PROXY)
+# ==============================================================================
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
-
-JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": "navbar-dark",
-    "accent": "accent-primary",
-    "navbar": "navbar-dark",
-    "no_navbar_border": False,
-    "navbar_fixed": False,
-    "layout_boxed": False,
-    "footer_fixed": False,
-    "sidebar_fixed": False,
-    "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    "theme": "default",
-    "dark_mode_theme": None,
-    "button_classes": {
-        "primary": "btn-primary",
-        "secondary": "btn-secondary",
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success"
-    }
-}
