@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'axes',
     
     # Tus aplicaciones locales (Módulos de Experfrut)
-    'app',
+    'app.apps.AppConfig',
 ]
 
 # 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
