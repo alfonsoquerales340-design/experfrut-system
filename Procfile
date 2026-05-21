@@ -1,1 +1,1 @@
-web: gunicorn --chdir /app app.wsgi --log-file -
+web: gunicorn experfrut_project.wsgi --log-file -
