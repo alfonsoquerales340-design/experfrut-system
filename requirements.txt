@@ -6,3 +6,6 @@ django_jazzmin
 django-otp
 django-axes
 whitenoise
+django-two-factor-auth
+django-phonenumber-field
+phonenumbers
