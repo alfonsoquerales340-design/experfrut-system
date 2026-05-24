@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 class RaizConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'app'
+    name = 'apps'  # <--- Cambia 'app' por 'apps'
