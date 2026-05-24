@@ -15,10 +15,10 @@ ALLOWED_HOSTS = ['*']
 
 # 2. APLICACIONES INSTALADAS
 INSTALLED_APPS = [
-    # Interfaz moderna
+    # Interfaz de administración moderna
     'jazzmin',
     
-    # Aplicaciones nativas
+    # Aplicaciones nativas de Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -26,11 +26,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Seguridad y Doble Factor
+    # Librerías de seguridad y autenticación
     'django_otp',
     'django_otp.plugins.otp_totp',
-    'two_factor',  # <-- Esta es la que tu urls.py estaba llamando a gritos
+    'two_factor',
     'axes',
+    
+    # Tu etiqueta virtual para los archivos de la raíz
+    'tienda', 
 ]
 
 # 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
