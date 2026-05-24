@@ -2,7 +2,7 @@ django
 gunicorn
 dj-database-url
 psycopg2-binary
-django-jazzmin
+django_jazzmin
 django-otp
 django-axes
 whitenoise
