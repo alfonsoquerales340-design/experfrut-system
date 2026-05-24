@@ -1,1 +1,1 @@
-web: python manage.py createsuperuser --noinput --username admin --email alfonso@example.com || true && python manage.py migrate && gunicorn experfrut_project.wsgi --log-file -
+web: python manage.py migrate --run-syncdb && gunicorn experfrut_project.wsgi --log-file -
