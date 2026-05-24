@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     'axes',
     
     # Apuntamos al contenedor por defecto del servidor
-    'app', 
+    'apps', 
 ]
 
 # 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
