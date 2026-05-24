@@ -31,8 +31,8 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_totp',
     'axes',
     
-    # Tus aplicaciones locales (Módulos de Experfrut)
-    'app.apps.AppConfig',
+    # Nota: No agregamos 'tienda' ni 'app' aquí porque tus archivos de código 
+    # principales viven directamente en la raíz junto a manage.py.
 ]
 
 # 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
