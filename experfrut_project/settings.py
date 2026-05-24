@@ -32,8 +32,8 @@ INSTALLED_APPS = [
     'two_factor',
     'axes',
     
-    # Tu etiqueta virtual para los archivos de la raíz
-    'tienda', 
+    # Configuración de la aplicación principal (archivos de la raíz)
+    'apps.RaizConfig', 
 ]
 
 # 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
@@ -44,7 +44,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_otp.middleware.OTPMiddleware',         # Seguridad de doble factor
+    'django_otp.middleware.OTPMiddleware',          # Seguridad de doble factor
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'axes.middleware.AxesMiddleware',              # Bloqueo de ataques de fuerza bruta
@@ -124,4 +124,3 @@ JAZZMIN_SETTINGS = {
     "navigation_expanded": True,
     "theme": "default",
 }
-
