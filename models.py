@@ -11,6 +11,9 @@ class CredencialHuella(models.Model):
     public_key = models.TextField()
     sign_count = models.IntegerField(default=0)
 
+    class Meta:
+        app_label = 'apps'  # Vincula el modelo a la app de la raíz
+
     def __str__(self):
         return f"Huella de {self.user.username}"
 
@@ -22,6 +25,7 @@ class Sucursal(models.Model):
     encargado = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sucursales')
 
     class Meta:
+        app_label = 'apps'  # Vincula el modelo a la app de la raíz
         verbose_name = "Sucursal"
         verbose_name_plural = "Sucursales"
 
@@ -41,6 +45,7 @@ class Hortifruti(models.Model):
     fecha_oferta = models.DateField(auto_now_add=True)
 
     class Meta:
+        app_label = 'apps'  # Vincula el modelo a la app de la raíz
         verbose_name = "Producto"
         verbose_name_plural = "Productos"
 
@@ -55,6 +60,7 @@ class StockPorSucursal(models.Model):
     cantidad_actual = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     class Meta:
+        app_label = 'apps'  # Vincula el modelo a la app de la raíz
         unique_together = ('sucursal', 'producto')
         verbose_name = "Stock por Sucursal"
         verbose_name_plural = "Stocks por Sucursales"
@@ -81,6 +87,7 @@ class MovimientoInventario(models.Model):
     anulado = models.BooleanField(default=False, verbose_name="¿Anulado?")
 
     class Meta:
+        app_label = 'apps'  # Vincula el modelo a la app de la raíz
         verbose_name = "Movimiento de Inventario"
         verbose_name_plural = "Movimientos de Inventario"
 
@@ -92,7 +99,7 @@ class MovimientoInventario(models.Model):
                     self.valor_total = float(self.cantidad) * float(self.producto.precio or 0)
                 elif self.tipo in ['PERDIDA', 'ENTRADA']:
                     self.valor_total = float(self.cantidad) * float(self.producto.costo or 0)
-        
+         
         super().save(*args, **kwargs)
 
     def __str__(self):
