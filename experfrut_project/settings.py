@@ -89,32 +89,31 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# 6. CONFIGURACIÓN DE IDIOMA Y HORARIO
+# 6. CONFIGURACIÓN DE RESPALDO DE AUTENTICACIÓN (CORREGIDO SIN ESPACIOS EXTRA)
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# 7. CONFIGURACIÓN DE IDIOMA Y HORARIO
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
-# 7. ARCHIVOS ESTÁTICOS (ESTRELLA PARA DESPLIEGUE)
+# 8. ARCHIVOS ESTÁTICOS
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 8. CONFIGURACIÓN EXTRA DE SEGURIDAD (AXES)
+# 9. CONFIGURACIÓN EXTRA DE SEGURIDAD (AXES)
 AXES_FAILURE_LIMIT = 5
 AXES_COOLDOWN = 1  # 1 hora de bloqueo si fallan intentos
 AXES_LOCKOUT_TEMPLATE = 'axes/lockout.html'
-# Eje de seguridad de Django Axes
-    'axes.backends.AxesStandaloneBackend',
-    
-    # Backend por defecto de Django
-    'django.contrib.auth.backends.ModelBackend',
-]
 
-# 9. PERSONALIZACIÓN VISUAL (JAZZMIN RESUMIDO)
+# 10. PERSONALIZACIÓN VISUAL (JAZZMIN RESUMIDO)
 JAZZMIN_SETTINGS = {
     "site_title": "Experfrut Admin",
     "site_header": "Experfrut",
