@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
-class AppConfig(AppConfig):
+class RaizConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'app'  # <-- Asegúrate de que diga exactamente 'app'
+    name = 'app'  # Le decimos a Django que el contenedor global se llama 'app'
