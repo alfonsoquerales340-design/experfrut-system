@@ -26,6 +26,9 @@ class Sucursal(models.Model):
 
     def __str__(self):
         return self.nombre
+        # Al final de los campos de esta clase, pegas esto:
+    class Meta:
+        app_label = 'tienda'
 
 # 2. Información General del Producto
 class Hortifruti(models.Model):
@@ -45,6 +48,9 @@ class Hortifruti(models.Model):
 
     def __str__(self):
         return self.nombre
+        # Al final de los campos de esta clase, pegas esto:
+    class Meta:
+        app_label = 'tienda'
 
 # 3. Stock individual por cada Tienda
 class StockPorSucursal(models.Model):
@@ -59,6 +65,9 @@ class StockPorSucursal(models.Model):
 
     def __str__(self):
         return f"{self.producto.nombre} en {self.sucursal.nombre}: {self.cantidad_actual} {self.producto.unidad}"
+        # Al final de los campos de esta clase, pegas esto:
+    class Meta:
+        app_label = 'tienda'
 
 # # 4. Historial de Movimientos
 class MovimientoInventario(models.Model):
@@ -66,6 +75,9 @@ class MovimientoInventario(models.Model):
         ('ENTRADA', 'Entrada (Llegada de camión)'),
         ('SALIDA', 'Salida (Venta/Balanza)'),
         ('PERDIDA', 'Pérdida (Merma)'),
+        # Al final de los campos de esta clase, pegas esto:
+    class Meta:
+        app_label = 'tienda'
     ]
 
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='movimientos')
