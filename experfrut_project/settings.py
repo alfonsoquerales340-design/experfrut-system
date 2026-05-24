@@ -33,8 +33,6 @@ INSTALLED_APPS = [
     
     # Tus aplicaciones locales (Módulos de Experfrut)
     'app.apps.AppConfig',
-    # Tus aplicaciones locales (Módulos de Experfrut)
-    'app',
 ]
 
 # 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
