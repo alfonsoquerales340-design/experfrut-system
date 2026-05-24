@@ -5,7 +5,8 @@ from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from two_factor.urls import urlpatterns as tf_urls
 
-from apps.views import index, registrar_salida, dashboard_vendas, analista_ia, ai_test, dashboard_avanzado
+# Cambia 'from apps.views import ...' por esto:
+from views import index, registrar_salida, dashboard_vendas, analista_ia, ai_test, dashboard_avanzado
 
 urlpatterns = [
     # 1. Admin (Jazzmin se acopla aquí)
