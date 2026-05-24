@@ -32,8 +32,8 @@ INSTALLED_APPS = [
     'two_factor',
     'axes',
     
-    # Configuración de la aplicación principal (archivos de la raíz)
-    'apps.RaizConfig', 
+    # Apuntamos al contenedor por defecto del servidor
+    'app', 
 ]
 
 # 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
