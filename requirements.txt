@@ -10,3 +10,4 @@ django-two-factor-auth
 django-phonenumber-field
 phonenumbers
 python-dotenv
+openai
