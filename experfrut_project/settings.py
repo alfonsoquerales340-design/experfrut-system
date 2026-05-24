@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 # 1. CONFIGURACIÓN BASE
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+sys.path.insert(0, os.path.join(BASE_DIR, 'app'))
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-tu-clave-secreta-aqui')
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     
     # Tus aplicaciones locales (Módulos de Experfrut)
     'app.apps.AppConfig',
+    # Tus aplicaciones locales (Módulos de Experfrut)
+    'app',
 ]
 
 # 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
