@@ -15,10 +15,10 @@ ALLOWED_HOSTS = ['*']
 
 # 2. APLICACIONES INSTALADAS
 INSTALLED_APPS = [
-    # Interfaz de administración moderna (Debe ir ANTES de django.contrib.admin)
+    # Interfaz moderna
     'jazzmin',
     
-    # Aplicaciones nativas de Django
+    # Aplicaciones nativas
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -26,13 +26,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Librerías de seguridad y autenticación
+    # Seguridad y Doble Factor
     'django_otp',
     'django_otp.plugins.otp_totp',
+    'two_factor',  # <-- Esta es la que tu urls.py estaba llamando a gritos
     'axes',
-    
-    # Nota: No agregamos 'tienda' ni 'app' aquí porque tus archivos de código 
-    # principales viven directamente en la raíz junto a manage.py.
 ]
 
 # 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
