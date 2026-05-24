@@ -11,3 +11,4 @@ django-phonenumber-field
 phonenumbers
 python-dotenv
 openai
+Pillow>=10.0.0
