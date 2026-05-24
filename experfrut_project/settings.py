@@ -107,6 +107,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AXES_FAILURE_LIMIT = 5
 AXES_COOLDOWN = 1  # 1 hora de bloqueo si fallan intentos
 AXES_LOCKOUT_TEMPLATE = 'axes/lockout.html'
+# Eje de seguridad de Django Axes
+    'axes.backends.AxesStandaloneBackend',
+    
+    # Backend por defecto de Django
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 # 9. PERSONALIZACIÓN VISUAL (JAZZMIN RESUMIDO)
 JAZZMIN_SETTINGS = {
