@@ -1,1 +1,1 @@
-web: python manage.py makemigrations apps && python manage.py migrate && gunicorn experfrut_project.wsgi --log-file -
+web: python manage.py makemigrations && python manage.py migrate --run-syncdb && gunicorn experfrut_project.wsgi --log-file -
