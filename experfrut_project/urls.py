@@ -7,7 +7,7 @@ from two_factor.urls import urlpatterns as tf_urls
 
 
 
-from tienda.views import index, registrar_salida, dashboard_vendas, analista_ia, ai_test, dashboard_avanzado
+from views import index, registrar_salida, dashboard_vendas, analista_ia, ai_test, dashboard_avanzado
 
 urlpatterns = [
     # 1. Admin (Jazzmin se acopla aquí)
