@@ -1,1 +1,1 @@
-web: python manage.py migrate --run-syncdb && gunicorn experfrut_project.wsgi --log-file -
+web: python manage.py migrate --noinput && gunicorn experfrut_project.wsgi --log-file -
