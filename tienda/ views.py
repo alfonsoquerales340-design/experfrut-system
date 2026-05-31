@@ -238,3 +238,4 @@ def dashboard_avanzado(request):
         'sucursal_seleccionada': sucursal_id,
         'categoria_seleccionada': categoria,
     })
+    # Forzando despliegue
