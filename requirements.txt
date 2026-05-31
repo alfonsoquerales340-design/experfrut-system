@@ -12,3 +12,4 @@ phonenumbers
 python-dotenv
 openai
 Pillow>=10.0.0
+whitenoise==6.8.2
