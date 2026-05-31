@@ -13,7 +13,7 @@ from django.db.models.functions import TruncDay, TruncMonth, TruncHour
 from django.utils import timezone
 
 # Importamos tus modelos
-from models import Hortifruti, MovimientoInventario, Sucursal, StockPorSucursal
+from .models import Hortifruti, MovimientoInventario, Sucursal, StockPorSucursal
 
 # Cargar variables de entorno
 load_dotenv()
