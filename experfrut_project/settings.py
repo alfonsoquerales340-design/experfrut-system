@@ -32,8 +32,8 @@ INSTALLED_APPS = [
     'two_factor',
     'axes',
     
-    # Apuntamos al contenedor por defecto del servidor
-    'apps', 
+   # Cambia 'apps' por el nombre real de tu carpeta:
+    'tienda', 
 ]
 
 # 3. MIDDLEWARES (ORDENADOS CORRECTAMENTE)
