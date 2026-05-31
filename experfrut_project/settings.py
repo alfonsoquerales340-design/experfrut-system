@@ -99,10 +99,13 @@ TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
-# 8. ARCHIVOS ESTÁTICOS
+# 8. ARCHIVOS ESTÁTICOS Y ENLACE DE CONEXIÓN WHITENOISE
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Añadimos el motor de almacenamiento de WhiteNoise para compresión y caché en servidores virtuales
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
