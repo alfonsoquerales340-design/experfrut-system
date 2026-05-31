@@ -12,7 +12,8 @@ class CredencialHuella(models.Model):
     sign_count = models.IntegerField(default=0)
 
     class Meta:
-        app_label = 'apps'  # Vincula el modelo a la app de la raíz
+        app_label = 'tienda'  # Vinculado a tu app actual
+        db_table = 'tienda_credencialhuella'
 
     def __str__(self):
         return f"Huella de {self.user.username}"
@@ -25,7 +26,8 @@ class Sucursal(models.Model):
     encargado = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sucursales')
 
     class Meta:
-        app_label = 'apps'  # Vincula el modelo a la app de la raíz
+        app_label = 'tienda'  # Vinculado a tu app actual
+        db_table = 'tienda_sucursal'  # Fuerza la tabla que Django está pidiendo en el index
         verbose_name = "Sucursal"
         verbose_name_plural = "Sucursales"
 
@@ -36,6 +38,7 @@ class Sucursal(models.Model):
 # 2. Información General del Producto
 class Hortifruti(models.Model):
     nombre = models.CharField(max_length=100, verbose_name="Nombre del Producto")
+    text = models.CharField(max_length=20, default="kg", verbose_name="Unidad")  # Mantiene tu campo nativo
     unidad = models.CharField(max_length=20, default="kg", verbose_name="Unidad")
     precio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio Venta (R$)")
     costo = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Precio Costo (R$)")
@@ -45,7 +48,8 @@ class Hortifruti(models.Model):
     fecha_oferta = models.DateField(auto_now_add=True)
 
     class Meta:
-        app_label = 'apps'  # Vincula el modelo a la app de la raíz
+        app_label = 'tienda'  # Vinculado a tu app actual
+        db_table = 'tienda_hortifruti'
         verbose_name = "Producto"
         verbose_name_plural = "Productos"
 
@@ -60,8 +64,9 @@ class StockPorSucursal(models.Model):
     cantidad_actual = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     class Meta:
-        app_label = 'apps'  # Vincula el modelo a la app de la raíz
+        app_label = 'tienda'  # Vinculado a tu app actual
         unique_together = ('sucursal', 'producto')
+        db_table = 'tienda_stockporsucursal'
         verbose_name = "Stock por Sucursal"
         verbose_name_plural = "Stocks por Sucursales"
 
@@ -87,7 +92,8 @@ class MovimientoInventario(models.Model):
     anulado = models.BooleanField(default=False, verbose_name="¿Anulado?")
 
     class Meta:
-        app_label = 'apps'  # Vincula el modelo a la app de la raíz
+        app_label = 'tienda'  # Vinculado a tu app actual
+        db_table = 'tienda_movimientoinventario'
         verbose_name = "Movimiento de Inventario"
         verbose_name_plural = "Movimientos de Inventario"
 
