@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 # 1. CONFIGURACIÓN BASE
 BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, os.path.join(BASE_DIR, 'app'))
+# Removimos la línea de inserción de 'app' que desviaba el enrutador de Django
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-tu-clave-secreta-aqui')
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
