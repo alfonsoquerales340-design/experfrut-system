@@ -5,8 +5,6 @@ from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from two_factor.urls import urlpatterns as tf_urls
 
-
-
 from tienda.views import index, registrar_salida, dashboard_vendas, analista_ia, ai_test, dashboard_avanzado
 
 urlpatterns = [
@@ -28,11 +26,11 @@ urlpatterns = [
     path('dashboard-avanzado/', dashboard_avanzado, name='dashboard_avanzado'),
 ]
 
-# Servir archivos multimedia (fotos de frutas) y archivos estáticos (CSS/JS de Jazzmin)
+# Servir archivos multimedia (fotos de frutas) y estáticos correctamente
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 else:
-    # Garantiza que en producción Railway no pierda los estilos ni las imágenes
+    # En producción, WhiteNoise maneja los estáticos automáticamente.
+    # Solo dejamos que Django mapee la carpeta MEDIA (fotos subidas) si es necesario.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
