@@ -12,6 +12,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-tu-clave-secreta-aqui
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+# CONFIGURACIÓN DE SEGURIDAD CSRF PARA PRODUCCIÓN (Arregla el error 403)
+CSRF_TRUSTED_ORIGINS = [
+    'https://web-production-c14c2.up.railway.app',
+]
 
 # 2. APLICACIONES INSTALADAS
 INSTALLED_APPS = [
