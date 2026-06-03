@@ -132,4 +132,9 @@ JAZZMIN_SETTINGS = {
     "show_sidebar": True,
     "navigation_expanded": True,
     "theme": "default",
+   
+    # CONFIGURACIÓN DE REDIRECCIÓN DE AUTENTICACIÓN (Corrige el error de /accounts/login/)
+LOGIN_URL = 'two_factor:login'
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'two_factor:login'
 }
