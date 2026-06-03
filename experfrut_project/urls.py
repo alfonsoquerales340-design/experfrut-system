@@ -19,11 +19,11 @@ urlpatterns = [
     path('dashboard/', dashboard_vendas, name='dashboard'),
     path('registrar-salida/', registrar_salida, name='registrar_salida'),
     path('analista-ia/', analista_ia, name='analista_ia'),
-    path('api/ai/', ai_test, name='api_ai_test'),  # Cambiado el name para evitar conflictos
+    path('api/ai/', ai_test, name='api_ai_test'),
     path('dashboard-avanzado/', dashboard_avanzado, name='dashboard_avanzado'),
 
-    # 4. Seguridad 2FA encapsulada con prefijo explícito para evitar que bloquee el admin
-    path('account/', include((tf_urls, 'two_factor'), namespace='two_factor')), 
+    # 4. Seguridad 2FA corregida sin tuplas para evitar el AttributeError de patrones
+    path('', include(tf_urls)), 
 ]
 
 # Servir archivos multimedia (fotos de frutas) y estáticos
