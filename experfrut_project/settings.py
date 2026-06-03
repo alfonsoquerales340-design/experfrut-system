@@ -6,17 +6,17 @@ from django.utils.translation import gettext_lazy as _
 
 # 1. CONFIGURACIÓN BASE
 BASE_DIR = Path(__file__).resolve().parent.parent
-# Removimos la línea de inserción de 'app' que desviaba el enrutador de Django
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-tu-clave-secreta-aqui')
 
+# Dejamos DEBUG en False ya que confirmamos que el enrutador de producción responde correctamente
 DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
 # 2. APLICACIONES INSTALADAS
 INSTALLED_APPS = [
-    # Interfaz de administración moderna
-    #'jazzmin',
+    # Interfaz de administración moderna (Reactivada para el diseño final)
+    'jazzmin',
     
     # Aplicaciones nativas de Django
     'django.contrib.admin',
@@ -50,11 +50,14 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'experfrut_project.urls'
 
+# MODIFICADO: Forzamos la búsqueda de plantillas nativas e instaladas (Solución A)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+        'APP_DIRS': True,  # CRÍTICO: Permite buscar los paneles de administración en las librerías globales
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -87,7 +90,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# 6. CONFIGURACIÓN DE RESPALDO DE AUTENTICACIÓN (CORREGIDO SIN ESPACIOS EXTRA)
+# 6. CONFIGURACIÓN DE RESPALDO DE AUTENTICACIÓN
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',
     'django.contrib.auth.backends.ModelBackend',
@@ -100,12 +103,12 @@ USE_I18N = True
 USE_TZ = True
 
 # 8. ARCHIVOS ESTÁTICOS Y ENLACE DE CONEXIÓN WHITENOISE
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# Añadimos el motor de almacenamiento de WhiteNoise para compresión y caché en servidores virtuales
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# MODIFICADO: Usamos un motor de almacenamiento tolerante a fallos menores de archivos estáticos
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
