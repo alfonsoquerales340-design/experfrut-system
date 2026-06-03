@@ -8,10 +8,10 @@ from two_factor.urls import urlpatterns as tf_urls
 from tienda.views import index, registrar_salida, dashboard_vendas, analista_ia, ai_test, dashboard_avanzado
 
 urlpatterns = [
-    # 1. Admin (Jazzmin se acopla aquí) - Con su barra explícita al inicio para máxima prioridad
-    path('control/', admin.site.urls),
+    # 1. Admin (Jazzmin se acopla aquí) - Con máxima prioridad en la raíz
+    path('admin/', admin.site.urls),
 
-    # 2. Service Worker (CRÍTICO para la instalación en el móvil de los stockers)
+    # 2. Service Worker (CRÍTICO para la instalación en el móvil)
     path('sw.js', TemplateView.as_view(template_name="sw.js", content_type='application/javascript'), name='sw.js'),
 
     # 3. Rutas fijas de la aplicación Experfrut
@@ -19,11 +19,11 @@ urlpatterns = [
     path('dashboard/', dashboard_vendas, name='dashboard'),
     path('registrar-salida/', registrar_salida, name='registrar_salida'),
     path('analista-ia/', analista_ia, name='analista_ia'),
-    path('api/ai/', ai_test, name='ai_test'),
+    path('api/ai/', ai_test, name='api_ai_test'),  # Cambiado el name para evitar conflictos
     path('dashboard-avanzado/', dashboard_avanzado, name='dashboard_avanzado'),
 
-    # 4. Seguridad 2FA y Huella (WebAuthn) - Como tú lo tenías nativamente, pero al final de la lista
-    path('', include(tf_urls)), 
+    # 4. Seguridad 2FA encapsulada con prefijo explícito para evitar que bloquee el admin
+    path('account/', include((tf_urls, 'two_factor'), namespace='two_factor')), 
 ]
 
 # Servir archivos multimedia (fotos de frutas) y estáticos
@@ -31,6 +31,4 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 else:
-    # En producción Railway, WhiteNoise sirve los estáticos automáticamente.
-    # Solo dejamos mapeada la carpeta MEDIA para las imágenes cargadas del inventario.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
