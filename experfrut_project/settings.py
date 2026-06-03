@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-tu-clave-secreta-aqui')
 
 # Dejamos DEBUG en False ya que confirmamos que el enrutador de producción responde correctamente
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
