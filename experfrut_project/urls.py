@@ -9,7 +9,7 @@ from tienda.views import index, registrar_salida, dashboard_vendas, analista_ia,
 
 urlpatterns = [
     # 1. Admin (Jazzmin se acopla aquí) - Con su barra explícita al inicio para máxima prioridad
-    path('admin/', admin.site.urls),
+    path('control/', admin.site.urls),
 
     # 2. Service Worker (CRÍTICO para la instalación en el móvil de los stockers)
     path('sw.js', TemplateView.as_view(template_name="sw.js", content_type='application/javascript'), name='sw.js'),
