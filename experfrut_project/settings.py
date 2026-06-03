@@ -16,7 +16,7 @@ ALLOWED_HOSTS = ['*']
 # 2. APLICACIONES INSTALADAS
 INSTALLED_APPS = [
     # Interfaz de administración moderna
-    'jazzmin',
+    #'jazzmin',
     
     # Aplicaciones nativas de Django
     'django.contrib.admin',
