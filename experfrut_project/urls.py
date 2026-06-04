@@ -22,8 +22,8 @@ urlpatterns = [
     path('api/ai/', ai_test, name='api_ai_test'),
     path('dashboard-avanzado/', dashboard_avanzado, name='dashboard_avanzado'),
 
-    # 4. Seguridad 2FA con prefijo propio para evitar choques con la tienda
-    path('account/', include((tf_urls, 'two_factor'))), 
+    # 4. Seguridad 2FA corregida: Pasamos la lista directa sin envolverla en tuplas
+    path('account/', include(tf_urls)), 
 ]
 
 # Servir archivos multimedia (fotos de frutas) y estáticos SOLO en desarrollo
