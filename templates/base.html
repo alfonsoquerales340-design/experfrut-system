@@ -23,9 +23,10 @@
             </span>
             
             <div>
-               <a href="{% url 'two_factor:login' %}?next=/admin/" class="btn btn-outline-light btn-sm border-2 fw-bold">
-    <i class="fas fa-user-shield"></i> PANEL ADMIN
-</a>
+                {# CAMBIADO: Apuntamos directo a la ruta absoluta interna del Administrador #}
+                <a href="/admin/" class="btn btn-outline-light btn-sm border-2 fw-bold">
+                    <i class="fas fa-user-shield"></i> PANEL ADMIN
+                </a>
             </div>
         </div>
     </nav>
@@ -48,3 +49,4 @@
     </script>
 </body>
 </html>
+
