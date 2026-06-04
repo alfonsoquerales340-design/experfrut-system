@@ -13,11 +13,11 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'experfrut_project.settings')
 
 application = get_wsgi_application()
 
-# SCRIPT DE INYECCIÓN COMPLETA CON CAMPOS DE SEGURIDAD AVANZADOS
+# SCRIPT DE INYECCIÓN COMPLETA CON MARCAS DE TIEMPO (created_at)
 try:
-    print("Sincronizando estructura avanzada para django_otp_staticdevice...")
+    print("Sincronizando campos de tiempo para django_otp_staticdevice...")
     with connection.cursor() as cursor:
-        # 1. Creamos la tabla con todos los campos requeridos por las versiones modernas
+        # 1. Creamos la tabla incluyendo las marcas de tiempo requeridas
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS django_otp_staticdevice (
                 id SERIAL PRIMARY KEY,
@@ -28,19 +28,21 @@ try:
                 last_used_at TIMESTAMP WITH TIME ZONE,
                 throttling_failure_timestamp TIMESTAMP WITH TIME ZONE,
                 throttling_failure_count INTEGER NOT NULL DEFAULT 0,
+                created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT django_otp_staticdevice_user_id_fk FOREIGN KEY (user_id)
                 REFERENCES auth_user (id) DEFERRABLE INITIALLY DEFERRED
             );
         """)
         
-        # 2. Por si acaso la tabla ya se creó antes sin estas columnas, se las agregamos a la fuerza
+        # 2. Inyectamos las columnas directamente por si la tabla ya existía de antes
         try:
-            cursor.execute("ALTER TABLE django_otp_staticdevice ADD COLUMN IF NOT EXISTS throttling_failure_timestamp TIMESTAMP WITH TIME ZONE;")
-            cursor.execute("ALTER TABLE django_otp_staticdevice ADD COLUMN IF NOT EXISTS throttling_failure_count INTEGER NOT NULL DEFAULT 0;")
+            cursor.execute("ALTER TABLE django_otp_staticdevice ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP;")
+            cursor.execute("ALTER TABLE django_otp_staticdevice ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP;")
         except Exception:
-            pass # Si ya existían, ignora el error
+            pass
             
-    print("¡Estructura de seguridad inyectada con éxito total!")
+    print("¡Estructura de tiempo inyectada con éxito total!")
 
     # Verificación y creación de tu superusuario Alfonso
     User = get_user_model()
