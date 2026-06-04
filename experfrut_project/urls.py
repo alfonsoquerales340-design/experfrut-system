@@ -8,7 +8,7 @@ from two_factor.urls import urlpatterns as tf_urls
 from tienda.views import index, registrar_salida, dashboard_vendas, analista_ia, ai_test, dashboard_avanzado
 
 urlpatterns = [
-    # 1. Admin (Jazzmin se acopla aquí) - Con máxima prioridad en la raíz
+    # 1. Admin (Jazzmin se acopla aquí) - Prioridad absoluta
     path('admin/', admin.site.urls),
 
     # 2. Service Worker (CRÍTICO para la instalación en el móvil)
@@ -22,13 +22,11 @@ urlpatterns = [
     path('api/ai/', ai_test, name='api_ai_test'),
     path('dashboard-avanzado/', dashboard_avanzado, name='dashboard_avanzado'),
 
-    # 4. Seguridad 2FA corregida sin tuplas para evitar el AttributeError de patrones
-    path('', include(tf_urls)), 
+    # 4. Seguridad 2FA con prefijo propio para evitar choques con la tienda
+    path('account/', include((tf_urls, 'two_factor'))), 
 ]
 
-# Servir archivos multimedia (fotos de frutas) y estáticos
+# Servir archivos multimedia (fotos de frutas) y estáticos SOLO en desarrollo
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-else:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
