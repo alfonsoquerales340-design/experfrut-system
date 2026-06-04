@@ -142,3 +142,5 @@ JAZZMIN_SETTINGS = {
 LOGIN_URL = 'two_factor:login'
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'two_factor:login'
+# Fuerza a Django a redirigir rutas sin barra diagonal (como /admin) a rutas con barra (/admin/)
+APPEND_SLASH = True
