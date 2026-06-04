@@ -1,63 +1,69 @@
-{% extends "two_factor/_base.html" %}  {# Cambia _base_focus por _base #}
+{% extends "base.html" %} {# Cambiado para usar tu diseño global de Experfrut #}
 {% load i18n %}
 
-{% block content %}
-  <h1> {% blocktitle %}{% trans "Configurar Huella Digital" %}{% endblocktitle %}</h1>
-  hola alfonso
-  <p>{% trans "Haz clic en el botón de abajo y toca el sensor de tu computadora para registrar tu huella." %}</p>
+{% block title %}{% trans "Configurar Huella Digital" %}{% endblock title %}
 
-  <form action="" method="post">{% csrf_token %}
+{% block content %}
+<div class="container my-5" style="max-width: 600px;">
+  <h1 class="mb-3">🔑 {% trans "Configurar Huella Digital" %}</h1>
+  <p class="text-muted">Hola Alfonso,</p>
+  <p>{% trans "Haz clic en el botón de abajo y toca el sensor de tu computadora o celular para registrar tu huella." %}</p>
+
+  <form action="" method="post" id="webauthn-form">{% csrf_token %}
     {{ wizard.management_form }}
     
-    <div style="margin-bottom: 20px;">
-      {# El campo donde se guarda el token #}
+    {# Convertimos el input a hidden para que no se vea un cuadro de texto feo en la interfaz #}
+    <div style="display: none;">
       {{ wizard.form.token }}
     </div>
 
-    <button type="button" id="register-webauthn" class="btn btn-primary">
-      {% trans "Registrar Huella Ahora" %}
-    </button>
+    <div class="d-grid gap-2 my-4">
+      <button type="button" id="register-webauthn" class="btn btn-primary btn-lg">
+        🛡️ {% trans "Registrar Huella Ahora" %}
+      </button>
+    </div>
 
-    <div class="mt-3">
+    <div class="mt-3 d-flex gap-2">
       <button type="submit" class="btn btn-success">{% trans "Finalizar Registro" %}</button>
       <a href="{% url 'two_factor:setup' %}" class="btn btn-secondary">{% trans "Cancelar" %}</a>
     </div>
   </form>
+</div>
 
-  {# SCRIPT PARA ACTIVAR EL SENSOR #}
-  <script>
-    document.getElementById('register-webauthn').addEventListener('click', async function() {
-      try {
-        const response = await fetch(window.location.href, {
-          headers: {'X-Requested-With': 'XMLHttpRequest'}
-        });
-        const options = await response.json();
+{# SCRIPT PARA ACTIVAR EL SENSOR #}
+<script>
+  document.getElementById('register-webauthn').addEventListener('click', async function() {
+    try {
+      const response = await fetch(window.location.href, {
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+      });
+      const options = await response.json();
 
-        // Convertir strings base64 a ArrayBuffer para el navegador
-        options.publicKey.challenge = Uint8Array.from(atob(options.publicKey.challenge), c => c.charCodeAt(0));
-        options.publicKey.user.id = Uint8Array.from(atob(options.publicKey.user.id), c => c.charCodeAt(0));
+      // Convertir strings base64 a ArrayBuffer para el navegador
+      options.publicKey.challenge = Uint8Array.from(atob(options.publicKey.challenge), c => c.charCodeAt(0));
+      options.publicKey.user.id = Uint8Array.from(atob(options.publicKey.user.id), c => c.charCodeAt(0));
 
-        const credential = await navigator.credentials.create({
-          publicKey: options.publicKey
-        });
+      const credential = await navigator.credentials.create({
+        publicKey: options.publicKey
+      });
 
-        // Guardar el resultado en el campo oculto
-        const tokenInput = document.querySelector('input[name*="token"]');
-        tokenInput.value = JSON.stringify({
-          id: credential.id,
-          rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
-          type: credential.type,
-          response: {
-            attestationObject: btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject))),
-            clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)))
-          }
-        });
+      // Guardar el resultado en el campo del token
+      const tokenInput = document.querySelector('input[name*="token"]');
+      tokenInput.value = JSON.stringify({
+        id: credential.id,
+        rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
+        type: credential.type,
+        response: {
+          attestationObject: btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject))),
+          clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)))
+        }
+      });
 
-        alert("¡Huella capturada con éxito! Ahora dale a 'Finalizar Registro'.");
-      } catch (err) {
-        console.error(err);
-        alert("Error al detectar el sensor: " + err);
-      }
-    });
-  </script>
+      alert("¡Huella capturada con éxito! Ahora haz clic en 'Finalizar Registro' para guardarla.");
+    } catch (err) {
+      console.error(err);
+      alert("Error al detectar el sensor: " + err);
+    }
+  });
+</script>
 {% endblock %}
