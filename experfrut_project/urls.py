@@ -8,8 +8,9 @@ from two_factor.urls import urlpatterns as tf_urls
 from tienda.views import index, registrar_salida, dashboard_vendas, analista_ia, ai_test, dashboard_avanzado
 
 urlpatterns = [
-    # 1. Admin (Jazzmin se acopla aquí) - Prioridad absoluta
+    # 1. Admin (Jazzmin se acopla aquí) - PRIORIDAD DUAL (Con barra y sin barra)
     path('admin/', admin.site.urls),
+    path('admin', admin.site.urls),  # <-- Parche definitivo para interceptar el 404 estático
 
     # 2. Service Worker (CRÍTICO para la instalación en el móvil)
     path('sw.js', TemplateView.as_view(template_name="sw.js", content_type='application/javascript'), name='sw.js'),
