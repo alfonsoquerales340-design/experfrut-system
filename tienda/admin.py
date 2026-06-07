@@ -9,7 +9,8 @@ from django.contrib.auth.forms import UserChangeForm
 from django.utils.safestring import mark_safe
 from .models import Sucursal, Hortifruti, StockPorSucursal, MovimientoInventario, CredencialHuella
 
-# --- 0. CONFIGURACIÓN BASE RESPONSIVA ---
+
+# --- 0. CONFIGURACIÓN BASE RESPONSIVA (INYECCIÓN DE SCRIPT MÓVIL) ---
 class ResponsiveAdmin(admin.ModelAdmin):
     class Media:
         css = {
@@ -18,7 +19,11 @@ class ResponsiveAdmin(admin.ModelAdmin):
                 'admin/css/custom_admin.css?v=1.1',
             )
         }
-        js = ('https://code.jquery.com/jquery-3.6.0.min.js',)
+        # Cargamos jQuery y nuestro archivo JavaScript global de retorno de forma limpia
+        js = (
+            'https://code.jquery.com/jquery-3.6.0.min.js',
+            'js/retorno_movil.js?v=1.2',
+        )
 
 
 # --- 1. INLINES ---
@@ -31,7 +36,7 @@ class StockInline(admin.TabularInline):
 
 # --- 2. PRODUCTOS (Hortifruti) ---
 @admin.register(Hortifruti)
-class HortifrutiAdmin(admin.ModelAdmin):
+class HortifrutiAdmin(ResponsiveAdmin):  # Cambiado a ResponsiveAdmin para que herede el botón móvil
     list_display = ('mostrar_imagen', 'nombre', 'precio_formateado', 'unidad', 'es_vegetal', 'activo')
     list_display_links = ('nombre',)
     list_filter = ('es_vegetal', 'activo', 'fecha_oferta')
@@ -50,7 +55,7 @@ class HortifrutiAdmin(admin.ModelAdmin):
 
 # --- 3. REGISTRO DE LA HUELLA ---
 @admin.register(CredencialHuella)
-class CredencialHuellaAdmin(admin.ModelAdmin):
+class CredencialHuellaAdmin(ResponsiveAdmin):  # Cambiado a ResponsiveAdmin para consistencia del botón
     list_display = ('user', 'credential_id', 'sign_count')
     search_fields = ('user__username',)
 
@@ -75,7 +80,7 @@ class StockPorSucursalAdmin(ResponsiveAdmin):
 
 
 # =====================================================================
-# --- 6. CONFIGURACIÓN DE USUARIOS (CON SEGURO DE CLAVE Y RETORNO MÓVIL) ---
+# --- 6. CONFIGURACIÓN DE USUARIOS (CON SEGURO DE CLAVE Y MEDIA) ---
 # =====================================================================
 class CustomUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
@@ -83,103 +88,31 @@ class CustomUserChangeForm(UserChangeForm):
 
 admin.site.unregister(User)
 
-# --- SCRIPT GLOBAL DE INYECCIÓN PARA MENÚ MÓVIL ---
-def script_retorno_tienda_global():
-    return mark_safe("""
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function inyectarBoton() {
-                // Selector para el bloque superior responsivo de Django Admin
-                const userTools = document.getElementById('user-tools') || 
-                                  document.querySelector('.sticky-nav-user') || 
-                                  document.querySelector('#header');
-                
-                if (userTools) {
-                    let userLinks = userTools.querySelector('.dropdown-contents') || 
-                                    userTools.querySelector('.dropdown-menu') || 
-                                    userTools.querySelector('.dropdown-content');
-                    
-                    if (!userLinks) {
-                        userLinks = userTools;
-                    }
-                    
-                    if (userLinks && !document.getElementById('enlace-retorno-tienda')) {
-                        const tiendaLi = document.createElement('div');
-                        tiendaLi.id = 'enlace-retorno-tienda';
-                        tiendaLi.style.borderTop = '1px solid #444';
-                        tiendaLi.style.marginTop = '5px';
-                        tiendaLi.style.display = 'inline-block';
-                        tiendaLi.innerHTML = `
-                            <a href="/" style="color: #28a745; font-weight: bold; display: block; padding: 8px 12px; text-decoration: none;">
-                                <i class="fas fa-shopping-basket" style="margin-right: 5px;"></i> Regresar a Tienda
-                            </a>
-                        `;
-                        userTools.appendChild(tiendaLi);
-                    }
-                }
-            }
-            inyectarBoton();
-            setTimeout(inyectarBoton, 600);
-        });
-    </script>
-    """)
+@admin.register(User)
+class CustomUserAdmin(UserAdmin): 
+    form = CustomUserChangeForm  
+    list_display = ('username', 'is_staff', 'is_active')
+    list_filter = ('is_staff', 'is_active')
+    save_on_top = True 
 
-# Interceptamos de forma limpia el contexto general sin alterar la estructura del objeto Media
-original_each_context = admin.site.each_context
-def nuevo_each_context(request):
-    context = original_each_context(request)
-    # Agregamos una variable personalizada de contexto en lugar de sumársela a 'media'
-    context['script_movil_custom'] = script_retorno_tienda_global()
-    return context
-admin.site.each_context = nuevo_each_context# --- SCRIPT GLOBAL DE INYECCIÓN PARA MENÚ MÓVIL ---
-def script_retorno_tienda_global():
-    return mark_safe("""
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function inyectarBoton() {
-                // Selector para el bloque superior responsivo de Django Admin
-                const userTools = document.getElementById('user-tools') || 
-                                  document.querySelector('.sticky-nav-user') || 
-                                  document.querySelector('#header');
-                
-                if (userTools) {
-                    let userLinks = userTools.querySelector('.dropdown-contents') || 
-                                    userTools.querySelector('.dropdown-menu') || 
-                                    userTools.querySelector('.dropdown-content');
-                    
-                    if (!userLinks) {
-                        userLinks = userTools;
-                    }
-                    
-                    if (userLinks && !document.getElementById('enlace-retorno-tienda')) {
-                        const tiendaLi = document.createElement('div');
-                        tiendaLi.id = 'enlace-retorno-tienda';
-                        tiendaLi.style.borderTop = '1px solid #444';
-                        tiendaLi.style.marginTop = '5px';
-                        tiendaLi.style.display = 'inline-block';
-                        tiendaLi.innerHTML = `
-                            <a href="/" style="color: #28a745; font-weight: bold; display: block; padding: 8px 12px; text-decoration: none;">
-                                <i class="fas fa-shopping-basket" style="margin-right: 5px;"></i> Regresar a Tienda
-                            </a>
-                        `;
-                        userTools.appendChild(tiendaLi);
-                    }
-                }
-            }
-            inyectarBoton();
-            setTimeout(inyectarBoton, 600);
-        });
-    </script>
-    """)
+    fieldsets = (
+        ('Credenciales', {'fields': ('username', 'password')}),
+        ('Información', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Permisos y Grupos', {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
+        }),
+        ('Fechas Importantes', {'fields': ('last_login', 'date_joined')}),
+    )
 
-# Interceptamos de forma limpia el contexto general sin alterar la estructura del objeto Media
-original_each_context = admin.site.each_context
-def nuevo_each_context(request):
-    context = original_each_context(request)
-    # Agregamos una variable personalizada de contexto en lugar de sumársela a 'media'
-    context['script_movil_custom'] = script_retorno_tienda_global()
-    return context
-admin.site.each_context = nuevo_each_context
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
+        js = (
+            'js/password_toggle.js',
+            'js/retorno_movil.js?v=1.2',  # También se lo inyectamos al control de usuarios
+        )
+
 
 # --- 7. MOVIMIENTOS E INVENTARIO INTELIGENTE ---
 @admin.register(MovimientoInventario)
