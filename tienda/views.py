@@ -39,17 +39,12 @@ def index(request):
 
     sucursal_id = request.GET.get('sucursal', 1)
     
+    # Consulta limpia usando únicamente el campo correcto: cantidad_actual
     stocks = StockPorSucursal.objects.filter(
         sucursal_id=sucursal_id,
         producto__activo=True,
-        amount_actual__gt=0 if hasattr(StockPorSucursal.objects.first(), 'amount_actual') else Q(cantidad_actual__gt=0)
+        cantidad_actual__gt=0
     ).select_related('producto').order_by('-producto__fecha_oferta')
-    
-    # Corrección de fallback dinámico para tu filtro de stock por si cambia el modelo
-    try:
-        stocks = StockPorSucursal.objects.filter(sucursal_id=sucursal_id, producto__activo=True, cantidad_actual__gt=0).select_related('producto').order_by('-producto__fecha_oferta')
-    except Exception:
-        stocks = StockPorSucursal.objects.filter(sucursal_id=sucursal_id, producto__activo=True, cantidad_actual__gt=0).select_related('producto').order_by('-producto__fecha_oferta')
 
     sucursales = Sucursal.objects.all()
     
