@@ -5,9 +5,11 @@ from django.contrib.auth.models import User
 from django.db.models import Sum, Case, When, F, FloatField
 from django.db.models.functions import TruncHour, TruncDay, TruncWeek, TruncMonth
 from django.utils.html import format_html
+from django.contrib.auth.forms import UserChangeForm
+from django.utils.safestring import mark_safe
 from .models import Sucursal, Hortifruti, StockPorSucursal, MovimientoInventario, CredencialHuella
 
-# --- 0. CONFIGURACIÓN BASE RESPONSIVA Y FORMULARIOS ---
+# --- 0. CONFIGURACIÓN BASE RESPONSIVA ---
 class ResponsiveAdmin(admin.ModelAdmin):
     class Media:
         css = {
@@ -18,22 +20,6 @@ class ResponsiveAdmin(admin.ModelAdmin):
         }
         js = ('https://code.jquery.com/jquery-3.6.0.min.js',)
 
-# Formulario personalizado para que la contraseña aparezca limpia con opción de ver
-class CustomUserChangeForm(forms.ModelForm):
-    password = forms.CharField(
-        label="Contraseña",
-        widget=forms.PasswordInput(attrs={
-            'class': 'vTextField', 
-            'placeholder': '••••••••',
-            'id': 'password-field'
-        }),
-        required=False,
-        help_text="Nota: Las contraseñas se almacenan encriptadas por seguridad."
-    )
-
-    class Meta:
-        model = User
-        fields = '__all__'
 
 # --- 1. INLINES ---
 class StockInline(admin.TabularInline):
@@ -41,6 +27,7 @@ class StockInline(admin.TabularInline):
     extra = 0
     readonly_fields = ('sucursal', 'cantidad_actual')
     can_delete = False
+
 
 # --- 2. PRODUCTOS (Hortifruti) ---
 @admin.register(Hortifruti)
@@ -60,11 +47,13 @@ class HortifrutiAdmin(admin.ModelAdmin):
         return "🍎" if not obj.es_vegetal else "🥦"
     mostrar_imagen.short_description = 'Icon'
 
+
 # --- 3. REGISTRO DE LA HUELLA ---
 @admin.register(CredencialHuella)
 class CredencialHuellaAdmin(admin.ModelAdmin):
     list_display = ('user', 'credential_id', 'sign_count')
     search_fields = ('user__username',)
+
 
 # --- 4. CONFIGURACIÓN DE SEDES (Sucursal) ---
 @admin.register(Sucursal)
@@ -76,6 +65,7 @@ class SucursalAdmin(ResponsiveAdmin):
         return format_html('<a href="https://www.google.com/maps/search/?api=1&query={}" target="_blank">📍 Ver</a>', obj.direccion)
     ver_mapa.short_description = 'Mapa'
 
+
 # --- 5. STOCK POR SUCURSAL ---
 @admin.register(StockPorSucursal)
 class StockPorSucursalAdmin(ResponsiveAdmin):
@@ -83,14 +73,14 @@ class StockPorSucursalAdmin(ResponsiveAdmin):
     list_filter = ('sucursal', 'producto')
     search_fields = ('producto__nombre',)
 
-# =====================================================================
-# --- 6. CONFIGURACIÓN DE USUARIOS (CON BOTÓN DE RETORNO A TIENDA MÓVIL) ---
-# =====================================================================
-from django.contrib.auth.forms import UserChangeForm
 
+# =====================================================================
+# --- 6. CONFIGURACIÓN DE USUARIOS (CON SEGURO DE CLAVE Y RETORNO MÓVIL) ---
+# =====================================================================
 class CustomUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = User
+
 
 admin.site.unregister(User)
 
@@ -110,49 +100,55 @@ class CustomUserAdmin(UserAdmin):
         ('Fechas Importantes', {'fields': ('last_login', 'date_joined')}),
     )
 
-    # Inyectamos el script para modificar el menú del perfil en el celular
     class Media:
         css = {
             'all': ('admin/css/custom_admin.css',)
         }
-        js = (
-            'js/password_toggle.js',
-            # Script inline dinámico para colocar el botón que me pediste
-        )
+        js = ('js/password_toggle.js',)
 
-# Este bloque inyecta el script directamente en el pie de página del administrador
-from django.utils.safestring import mark_safe
 
 def agregar_boton_retorno_movil():
     return mark_safe("""
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Buscamos el contenedor del menú desplegable de la cuenta
-            const userLinks = document.querySelector('#user-tools .dropdown-contents') || 
-                              document.querySelector('.sticky-nav-user .dropdown-menu') ||
-                              document.querySelector('.dropdown-content'); 
+            // Buscador robusto para interactuar con la cabecera responsiva de Django
+            const userTools = document.getElementById('user-tools') || document.querySelector('.sticky-nav-user');
             
-            if (userLinks) {
-                // Creamos la nueva opción de regresar a la tienda
-                const tiendaLi = document.createElement('div');
-                tiendaLi.className = 'dropdown-item-container'; // Mantiene compatibilidad de estilos
-                tiendaLi.innerHTML = `
-                    <a href="/" style="color: #28a745; font-weight: bold; border-top: 1px solid #eee; display: block; padding: 10px 15px; text-decoration: none;">
-                        <i class="fas fa-shopping-basket" style="margin-right: 5px;"></i> Regresar a Tienda
-                    </a>
-                `;
-                // Lo añadimos justo al final del menú negro que marcaste
-                userLinks.appendChild(tiendaLi);
+            if (userTools) {
+                // Buscamos los contenedores de enlaces internos del menú desplegable móvil
+                let userLinks = userTools.querySelector('.dropdown-contents') || 
+                                userTools.querySelector('.dropdown-menu') || 
+                                userTools.querySelector('.dropdown-content');
+                
+                // Si la estructura móvil es plana por herencia CSS básica
+                if (!userLinks) {
+                    userLinks = userTools;
+                }
+                
+                if (userLinks) {
+                    const tiendaLi = document.createElement('div');
+                    tiendaLi.className = 'dropdown-item-container';
+                    tiendaLi.style.borderTop = '1px solid #444';
+                    tiendaLi.style.marginTop = '5px';
+                    tiendaLi.innerHTML = `
+                        <a href="/" style="color: #28a745; font-weight: bold; display: block; padding: 10px 15px; text-decoration: none;">
+                            <i class="fas fa-shopping-basket" style="margin-right: 5px;"></i> Regresar a Tienda
+                        </a>
+                    `;
+                    userLinks.appendChild(tiendaLi);
+                }
             }
         });
     </script>
     """)
 
-# Conectamos el script para que Django lo renderice en todo el panel admin
+# Inyectamos de forma segura la función al flujo de renderizado del formulario
 admin.site.add_action(lambda modeladmin, request, queryset: None, "placeholder") 
 CustomUserAdmin.add_to_class('render_change_form', lambda self, request, context, *args, **kwargs: 
     context.update({'media': context['media'] + agregar_boton_retorno_movil()}) or super(CustomUserAdmin, self).render_change_form(request, context, *args, **kwargs)
 )
+
+
 # --- 7. MOVIMIENTOS E INVENTARIO INTELIGENTE ---
 @admin.register(MovimientoInventario)
 class MovimientoInventarioAdmin(ResponsiveAdmin):
