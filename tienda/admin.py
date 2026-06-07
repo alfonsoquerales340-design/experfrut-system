@@ -81,8 +81,44 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = User
 
-
 admin.site.unregister(User)
+
+# Función limpia que genera el script para el menú móvil flotante
+def obtener_script_retorno_movil():
+    return mark_safe("""
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Buscador robusto para interactuar con la cabecera responsiva de Django
+            const userTools = document.getElementById('user-tools') || document.querySelector('.sticky-nav-user');
+            
+            if (userTools) {
+                // Buscamos los contenedores de enlaces internos del menú desplegable móvil
+                let userLinks = userTools.querySelector('.dropdown-contents') || 
+                                userTools.querySelector('.dropdown-menu') || 
+                                userTools.querySelector('.dropdown-content');
+                
+                // Si la estructura móvil es plana por herencia CSS básica
+                if (!userLinks) {
+                    userLinks = userTools;
+                }
+                
+                if (userLinks && !document.getElementById('enlace-retorno-tienda')) {
+                    const tiendaLi = document.createElement('div');
+                    tiendaLi.id = 'enlace-retorno-tienda';
+                    tiendaLi.className = 'dropdown-item-container';
+                    tiendaLi.style.borderTop = '1px solid #444';
+                    tiendaLi.style.marginTop = '5px';
+                    tiendaLi.innerHTML = `
+                        <a href="/" style="color: #28a745; font-weight: bold; display: block; padding: 10px 15px; text-decoration: none;">
+                            <i class="fas fa-shopping-basket" style="margin-right: 5px;"></i> Regresar a Tienda
+                        </a>
+                    `;
+                    userLinks.appendChild(tiendaLi);
+                }
+            }
+        });
+    </script>
+    """)
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin): 
@@ -106,48 +142,10 @@ class CustomUserAdmin(UserAdmin):
         }
         js = ('js/password_toggle.js',)
 
-
-def agregar_boton_retorno_movil():
-    return mark_safe("""
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Buscador robusto para interactuar con la cabecera responsiva de Django
-            const userTools = document.getElementById('user-tools') || document.querySelector('.sticky-nav-user');
-            
-            if (userTools) {
-                // Buscamos los contenedores de enlaces internos del menú desplegable móvil
-                let userLinks = userTools.querySelector('.dropdown-contents') || 
-                                userTools.querySelector('.dropdown-menu') || 
-                                userTools.querySelector('.dropdown-content');
-                
-                // Si la estructura móvil es plana por herencia CSS básica
-                if (!userLinks) {
-                    userLinks = userTools;
-                }
-                
-                if (userLinks) {
-                    const tiendaLi = document.createElement('div');
-                    tiendaLi.className = 'dropdown-item-container';
-                    tiendaLi.style.borderTop = '1px solid #444';
-                    tiendaLi.style.marginTop = '5px';
-                    tiendaLi.innerHTML = `
-                        <a href="/" style="color: #28a745; font-weight: bold; display: block; padding: 10px 15px; text-decoration: none;">
-                            <i class="fas fa-shopping-basket" style="margin-right: 5px;"></i> Regresar a Tienda
-                        </a>
-                    `;
-                    userLinks.appendChild(tiendaLi);
-                }
-            }
-        });
-    </script>
-    """)
-
-# Inyectamos de forma segura la función al flujo de renderizado del formulario
-admin.site.add_action(lambda modeladmin, request, queryset: None, "placeholder") 
-CustomUserAdmin.add_to_class('render_change_form', lambda self, request, context, *args, **kwargs: 
-    context.update({'media': context['media'] + agregar_boton_retorno_movil()}) or super(CustomUserAdmin, self).render_change_form(request, context, *args, **kwargs)
-)
-
+    # Sobreescritura limpia y nativa del método para inyectar el botón de regreso
+    def render_change_form(self, request, context, *args, **kwargs):
+        context['media'] = context['media'] + obtener_script_retorno_movil()
+        return super().render_change_form(request, context, *args, **kwargs)
 
 # --- 7. MOVIMIENTOS E INVENTARIO INTELIGENTE ---
 @admin.register(MovimientoInventario)
