@@ -22,7 +22,11 @@
                 <i class="fas fa-leaf me-2"></i> Experfrut System
             </span>
             
-            <div>
+            <div class="d-flex gap-2">
+                <button id="btnInstalarPWA" class="btn btn-warning btn-sm fw-bold d-none">
+                    <i class="fas fa-download"></i> INSTALAR APP
+                </button>
+                
                 {# CAMBIADO: Apuntamos directo a la ruta absoluta interna del Administrador #}
                 <a href="/admin/" class="btn btn-outline-light btn-sm border-2 fw-bold">
                     <i class="fas fa-user-shield"></i> PANEL ADMIN
@@ -39,6 +43,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+    // Registro básico del Service Worker que ya tenías configurado
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register("{% static 'js/sw.js' %}")
@@ -46,6 +51,41 @@
                 .catch(err => console.error('Error al registrar la PWA', err));
         });
     }
+
+    // --- NUEVO SCRIPT DE CAPTURA PARA INSTALACIÓN FORZADA ---
+    let eventoInstalacion;
+    const botonInstalar = document.getElementById('btnInstalarPWA');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Previene que Android muestre el banner genérico para usar nuestro propio botón
+        e.preventDefault();
+        eventoInstalacion = e;
+        // Hace visible el botón amarillo de "INSTALAR APP" en la barra de navegación
+        if (botonInstalar) {
+            botonInstalar.classList.remove('d-none');
+        }
+    });
+
+    if (botonInstalar) {
+        botonInstalar.addEventListener('click', async () => {
+            if (!eventoInstalacion) return;
+            // Muestra el prompt nativo del sistema operativo (Android/PC)
+            eventoInstalacion.prompt();
+            const { outcome } = await eventoInstalacion.userChoice;
+            console.log(`El usuario respondió a la instalación: ${outcome}`);
+            // Una vez instalado, volvemos a ocultar el botón
+            botonInstalar.classList.add('d-none');
+            eventoInstalacion = null;
+        });
+    }
+
+    // Ocultar el botón si la aplicación ya se está ejecutando de forma independiente
+    window.addEventListener('appinstalled', () => {
+        console.log('¡Experfrut System instalado con éxito en el dispositivo!');
+        if (botonInstalar) {
+            botonInstalar.classList.add('d-none');
+        }
+    });
     </script>
 </body>
 </html>
