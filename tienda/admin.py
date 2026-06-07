@@ -83,12 +83,21 @@ class StockPorSucursalAdmin(ResponsiveAdmin):
     list_filter = ('sucursal', 'producto')
     search_fields = ('producto__nombre',)
 
-# --- 6. CONFIGURACIÓN DE USUARIOS (CON CAMPO DE CONTRASEÑA CORREGIDO Y RESPONSIVO) ---
+# =====================================================================
+# --- 6. CONFIGURACIÓN DE USUARIOS (CON CAMPO DE CONTRASEÑA SEGURO Y RESPONSIVO) ---
+# =====================================================================
+from django.contrib.auth.forms import UserChangeForm
+
+# Formulario personalizado HEREDANDO de UserChangeForm para proteger el cifrado
+class CustomUserChangeForm(UserChangeForm):
+    class Meta(UserChangeForm.Meta):
+        model = User
+
 admin.site.unregister(User)
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin): 
-    form = CustomUserChangeForm  # Vincula el formulario para ocultar el hash técnico
+    form = CustomUserChangeForm  # Vincula el formulario seguro que maneja hashes de Django
     list_display = ('username', 'is_staff', 'is_active')
     list_filter = ('is_staff', 'is_active')
     save_on_top = True 
