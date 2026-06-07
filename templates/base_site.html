@@ -1,0 +1,7 @@
+{% extends "admin/base.html" %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {# Aquí cargamos el botón de regreso de forma segura sin romper los formularios #}
+    {{ script_movil_custom }}
+{% endblock %}
