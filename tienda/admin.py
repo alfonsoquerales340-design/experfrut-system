@@ -84,11 +84,10 @@ class StockPorSucursalAdmin(ResponsiveAdmin):
     search_fields = ('producto__nombre',)
 
 # =====================================================================
-# --- 6. CONFIGURACIÓN DE USUARIOS (CON CAMPO DE CONTRASEÑA SEGURO Y RESPONSIVO) ---
+# --- 6. CONFIGURACIÓN DE USUARIOS (CON BOTÓN DE RETORNO A TIENDA MÓVIL) ---
 # =====================================================================
 from django.contrib.auth.forms import UserChangeForm
 
-# Formulario personalizado HEREDANDO de UserChangeForm para proteger el cifrado
 class CustomUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = User
@@ -97,7 +96,7 @@ admin.site.unregister(User)
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin): 
-    form = CustomUserChangeForm  # Vincula el formulario seguro que maneja hashes de Django
+    form = CustomUserChangeForm  
     list_display = ('username', 'is_staff', 'is_active')
     list_filter = ('is_staff', 'is_active')
     save_on_top = True 
@@ -111,13 +110,49 @@ class CustomUserAdmin(UserAdmin):
         ('Fechas Importantes', {'fields': ('last_login', 'date_joined')}),
     )
 
-    # Inyecta tanto tu CSS responsivo como el JavaScript que activa el ojo para ver la contraseña
+    # Inyectamos el script para modificar el menú del perfil en el celular
     class Media:
         css = {
             'all': ('admin/css/custom_admin.css',)
         }
-        js = ('js/password_toggle.js',)
+        js = (
+            'js/password_toggle.js',
+            # Script inline dinámico para colocar el botón que me pediste
+        )
 
+# Este bloque inyecta el script directamente en el pie de página del administrador
+from django.utils.safestring import mark_safe
+
+def agregar_boton_retorno_movil():
+    return mark_safe("""
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Buscamos el contenedor del menú desplegable de la cuenta
+            const userLinks = document.querySelector('#user-tools .dropdown-contents') || 
+                              document.querySelector('.sticky-nav-user .dropdown-menu') ||
+                              document.querySelector('.dropdown-content'); 
+            
+            if (userLinks) {
+                // Creamos la nueva opción de regresar a la tienda
+                const tiendaLi = document.createElement('div');
+                tiendaLi.className = 'dropdown-item-container'; // Mantiene compatibilidad de estilos
+                tiendaLi.innerHTML = `
+                    <a href="/" style="color: #28a745; font-weight: bold; border-top: 1px solid #eee; display: block; padding: 10px 15px; text-decoration: none;">
+                        <i class="fas fa-shopping-basket" style="margin-right: 5px;"></i> Regresar a Tienda
+                    </a>
+                `;
+                // Lo añadimos justo al final del menú negro que marcaste
+                userLinks.appendChild(tiendaLi);
+            }
+        });
+    </script>
+    """)
+
+# Conectamos el script para que Django lo renderice en todo el panel admin
+admin.site.add_action(lambda modeladmin, request, queryset: None, "placeholder") 
+CustomUserAdmin.add_to_class('render_change_form', lambda self, request, context, *args, **kwargs: 
+    context.update({'media': context['media'] + agregar_boton_retorno_movil()}) or super(CustomUserAdmin, self).render_change_form(request, context, *args, **kwargs)
+)
 # --- 7. MOVIMIENTOS E INVENTARIO INTELIGENTE ---
 @admin.register(MovimientoInventario)
 class MovimientoInventarioAdmin(ResponsiveAdmin):
