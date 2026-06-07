@@ -130,13 +130,19 @@ JAZZMIN_SETTINGS = {
     "copyright": "Experfrut Ltd",
     "search_model": ["auth.User"],
     "user_avatar": None,
+    
+    # Barra superior con el botón de regreso a la tienda integrado
     "topmenu_links": [
         {"name": "Inicio", "url": "admin:index", "permissions": ["auth.view_user"]},
+        
+        # BOTÓN NUEVO: Apunta a tu vista principal 'index' de la tienda
+        {"name": "Ver Tienda", "url": "index", "icon": "fas fa-shopping-basket", "new_window": False},
     ],
+    
     "show_sidebar": True,
     "navigation_expanded": True,
     "theme": "default",
-   }
+}
    
 # CONFIGURACIÓN DE REDIRECCIÓN DE AUTENTICACIÓN (Corrige el error de /accounts/login/)
 LOGIN_URL = 'two_factor:login'
