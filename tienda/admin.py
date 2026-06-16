@@ -11,55 +11,58 @@ from .models import Sucursal, Hortifruti, StockPorSucursal, MovimientoInventario
 
 
 # =====================================================================
-# 🔥 TRUCO MAESTRO: INYECCIÓN GLOBAL EN TODO EL PANEL DE JAZZMIN 🔥
+# 🔥 INYECCIÓN GLOBAL: BOTÓN FLOTANTE INMUNE A JAZZMIN 🔥
 # =====================================================================
-# Modificamos el contexto base de Django Admin para que el script de la tienda
-# se cargue en CUALQUIER sección (Listas, Edición, Formularios, Inicio, etc.)
+# Modificamos el contexto base de Django Admin para pintar un botón fijo 
+# en la esquina de la pantalla que funciona en PC y Celular sin fallar.
 original_each_context = admin.site.each_context
 
 def nuevo_each_context(request):
     context = original_each_context(request)
     context['html_inyectado'] = mark_safe('''
-        <script>
-            (function() {
-                function inyectarBotonTiendaFlotante() {
-                    if (document.getElementById('enlace-tienda-inyectado')) return;
-
-                    var userMenu = document.getElementById('jazzy-usermenu');
-                    if (userMenu) {
-                        var botonPerfil = userMenu.querySelector('a[href*="change"]');
-                        if (botonPerfil) {
-                            var tiendaLink = document.createElement('a');
-                            tiendaLink.id = 'enlace-tienda-inyectado';
-                            tiendaLink.href = '/'; 
-                            tiendaLink.className = 'dropdown-item dropdown-footer';
-                            
-                            // Estilos estables en verde para resaltar
-                            tiendaLink.style.color = '#28a745';
-                            tiendaLink.style.fontWeight = 'bold';
-                            tiendaLink.style.borderBottom = '1px solid #edf2f7';
-                            tiendaLink.style.textAlign = 'center';
-                            tiendaLink.style.display = 'block';
-                            tiendaLink.style.padding = '0.5rem 1rem';
-
-                            tiendaLink.innerHTML = '<i class="fas fa-shopping-basket" style="margin-right: 6px;"></i> Ver tienda';
-                            botonPerfil.parentNode.insertBefore(tiendaLink, botonPerfil);
-                        }
-                    }
+        <style>
+            .boton-flotante-tienda {
+                position: fixed;
+                bottom: 25px;
+                right: 25px;
+                background-color: #28a745;
+                color: white !important;
+                font-weight: bold;
+                font-size: 15px;
+                padding: 12px 22px;
+                border-radius: 50px;
+                box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+                z-index: 999999 !important; /* Lo pone por encima de todo Jazzmin */
+                text-decoration: none !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.2s ease, background-color 0.2s ease;
+                cursor: pointer;
+            }
+            /* Efecto cuando pasas el mouse o lo tocas en el celular */
+            .boton-flotante-tienda:hover, .boton-flotante-tienda:active {
+                background-color: #218838 !important;
+                transform: scale(1.05);
+            }
+            /* Si estás en PC y quieres que sea un poco más discreto, puedes dejarlo igual */
+            @media (max-width: 768px) {
+                .boton-flotante-tienda {
+                    bottom: 20px;
+                    right: 20px;
+                    padding: 10px 18px;
+                    font-size: 14px;
                 }
+            }
+        </style>
 
-                // El MutationObserver se encarga de vigilar cuándo Jazzmin abre el menú en móvil
-                var observer = new MutationObserver(function() {
-                    inyectarBotonTiendaFlotante();
-                });
-                observer.observe(document.body, { childList: true, subtree: true });
-                window.addEventListener('load', inyectarBotonTiendaFlotante);
-            })();
-        </script>
+        <a href="/" class="boton-flotante-tienda">
+            <i class="fas fa-shopping-basket" style="margin-right: 8px;"></i> Ver Tienda 🏪
+        </a>
     ''')
     return context
 
-# Sobrescribimos el método original de Django
+# Reemplazamos el método nativo de Django
 admin.site.each_context = nuevo_each_context
 # =====================================================================
 
@@ -70,7 +73,7 @@ class ResponsiveAdmin(admin.ModelAdmin):
         css = {
             'all': (
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css',
-                'admin/css/custom_admin.css?v=1.4', 
+                'admin/css/custom_admin.css?v=1.5', 
             )
         }
         js = (
