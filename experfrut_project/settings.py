@@ -131,12 +131,19 @@ JAZZMIN_SETTINGS = {
     "search_model": ["auth.User"],
     "user_avatar": None,
     
-    # Barra superior con el botón de regreso a la tienda integrado
+    # MODIFICADO: Estructura robusta para obligar a Bootstrap a mostrar el botón en móviles
     "topmenu_links": [
         {"name": "Inicio", "url": "admin:index", "permissions": ["auth.view_user"]},
         
-        # BOTÓN NUEVO: Apunta a tu vista principal 'index' de la tienda
-        {"name": "Ver Tienda", "url": "index", "icon": "fas fa-shopping-basket", "new_window": False},
+        # Al meterlo como un "children", Jazzmin genera un menú tipo Dropdown nativo 
+        # que NO se oculta en celulares y se mantiene visible en la barra de arriba.
+        {
+            "name": "Ver Tienda", 
+            "icon": "fas fa-shopping-basket", 
+            "children": [
+                {"name": "Ir a la Tienda 🏪", "url": "/", "new_window": False},
+            ]
+        },
     ],
     
     "show_sidebar": True,
