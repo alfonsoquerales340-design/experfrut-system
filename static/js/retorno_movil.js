@@ -7,14 +7,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const userTools = document.getElementById('user-tools') || 
                           document.querySelector('.sticky-nav-user') || 
                           document.querySelector('#header') ||
-                          document.body; // Capa de seguridad por si cambia la estructura del DOM
+                          document.body;
 
         if (userTools) {
-            // 2. Buscamos exhaustivamente todos los elementos dentro del menú
+            // 2. Buscamos todos los elementos dentro del menú para encontrar el ancla
             const items = userTools.querySelectorAll('a, div, span, p');
             let targetElement = null;
 
-            // Intentamos localizar "Ver perfil" como punto de anclaje
+            // Localizamos "Ver perfil" para posicionar el nuevo enlace
             for (let item of items) {
                 if (item.textContent.trim() === 'Ver perfil') {
                     targetElement = item;
@@ -22,29 +22,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // 3. Si encontramos "Ver perfil", inyectamos la Tienda con su mismo estilo
+            // 3. Si encontramos "Ver perfil", inyectamos "Ver tienda" justo arriba con su mismo estilo
             if (targetElement) {
                 const tiendaLink = document.createElement('a');
                 tiendaLink.id = 'enlace-retorno-tienda';
-                tiendaLink.href = '/'; // Tu ruta raíz o de la tienda
+                tiendaLink.href = '/'; // Cambia esto por la URL de tu HTML de la tienda si es diferente (ej: '/tienda/')
                 
-                // Conservamos las clases originales del admin para que el CSS nativo aplique (paddings, hover, fuentes)
+                // Heredamos las clases de "Ver perfil" para que se vea idéntico
                 tiendaLink.className = targetElement.className;
                 
                 if (targetElement.getAttribute('style')) {
                     tiendaLink.setAttribute('style', targetElement.getAttribute('style'));
                 }
 
-                // Agregamos el texto e icono dinámicamente
+                // Estructura interna con icono y texto alineado al estilo del admin
                 tiendaLink.innerHTML = `
-                    <i class="fas fa-shopping-basket" style="margin-right: 6px; color: #28a745;"></i> Tienda
+                    <i class="fas fa-store" style="margin-right: 6px; color: #28a745;"></i> Ver tienda
                 `;
 
                 // Lo insertamos exactamente arriba de "Ver perfil"
                 targetElement.parentNode.insertBefore(tiendaLink, targetElement);
                 
             } else {
-                // 4. Fallback: Si por alguna razón "Ver perfil" no aparece, usamos tu lógica original al final de la lista
+                // 4. Fallback: Si no se encuentra el elemento de anclaje, usamos la inserción al final del contenedor
                 let userLinks = userTools.querySelector('.dropdown-contents') || 
                                 userTools.querySelector('.dropdown-menu') || 
                                 userTools.querySelector('.dropdown-content');
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     tiendaLi.style.paddingTop = '4px';
                     tiendaLi.innerHTML = `
                         <a href="/" style="color: #28a745; font-weight: bold; display: block; padding: 10px 15px; text-decoration: none; font-size: 13px;">
-                            <i class="fas fa-shopping-basket" style="margin-right: 6px;"></i> Regresar a Tienda
+                            <i class="fas fa-store" style="margin-right: 6px;"></i> Ver tienda
                         </a>
                     `;
                     userLinks.appendChild(tiendaLi);
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Se ejecuta al instante y lleva el temporizador por si la carga de red en móviles demora
+    // Ejecución inicial y retraso por carga asíncrona en dispositivos móviles
     agregarBotonRegresar();
     setTimeout(agregarBotonRegresar, 600);
 });
