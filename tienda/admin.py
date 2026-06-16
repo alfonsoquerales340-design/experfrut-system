@@ -19,10 +19,10 @@ class ResponsiveAdmin(admin.ModelAdmin):
                 'admin/css/custom_admin.css?v=1.1',
             )
         }
-        # Cargamos jQuery y nuestro archivo JavaScript global de retorno de forma limpia
+        # Aseguramos la ruta correcta dentro de static/admin/js/
         js = (
             'https://code.jquery.com/jquery-3.6.0.min.js',
-            'js/retorno_movil.js?v=1.2',
+            'admin/js/retorno_movil.js?v=1.2',
         )
 
 
@@ -36,7 +36,7 @@ class StockInline(admin.TabularInline):
 
 # --- 2. PRODUCTOS (Hortifruti) ---
 @admin.register(Hortifruti)
-class HortifrutiAdmin(ResponsiveAdmin):  # Cambiado a ResponsiveAdmin para que herede el botón móvil
+class HortifrutiAdmin(ResponsiveAdmin):  
     list_display = ('mostrar_imagen', 'nombre', 'precio_formateado', 'unidad', 'es_vegetal', 'activo')
     list_display_links = ('nombre',)
     list_filter = ('es_vegetal', 'activo', 'fecha_oferta')
@@ -55,7 +55,7 @@ class HortifrutiAdmin(ResponsiveAdmin):  # Cambiado a ResponsiveAdmin para que h
 
 # --- 3. REGISTRO DE LA HUELLA ---
 @admin.register(CredencialHuella)
-class CredencialHuellaAdmin(ResponsiveAdmin):  # Cambiado a ResponsiveAdmin para consistencia del botón
+class CredencialHuellaAdmin(ResponsiveAdmin):  
     list_display = ('user', 'credential_id', 'sign_count')
     search_fields = ('user__username',)
 
@@ -106,11 +106,16 @@ class CustomUserAdmin(UserAdmin):
 
     class Media:
         css = {
-            'all': ('admin/css/custom_admin.css',)
+            'all': (
+                'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css',
+                'admin/css/custom_admin.css?v=1.1',
+            )
         }
+        # Corregido: Agregada la subcarpeta admin/ para asegurar consistencia de rutas en el servidor
         js = (
-            'js/password_toggle.js',
-            'js/retorno_movil.js?v=1.2',  # También se lo inyectamos al control de usuarios
+            'https://code.jquery.com/jquery-3.6.0.min.js',
+            'admin/js/password_toggle.js',
+            'admin/js/retorno_movil.js?v=1.2',  
         )
 
 
