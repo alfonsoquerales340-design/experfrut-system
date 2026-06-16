@@ -1,7 +1,9 @@
 {% extends "admin/base.html" %}
 
-{% block extrahead %}
+{% block userlinks %}
     {{ block.super }}
-    {# Aquí cargamos el botón de regreso de forma segura sin romper los formularios #}
-    {{ script_movil_custom }}
+    <div class="dropdown-divider"></div>
+    <a href="/" class="dropdown-item">
+        <i class="fas fa-shopping-basket mr-2"></i> Ver Tienda 🏪
+    </a>
 {% endblock %}
