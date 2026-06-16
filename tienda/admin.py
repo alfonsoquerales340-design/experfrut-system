@@ -9,6 +9,61 @@ from django.contrib.auth.forms import UserChangeForm
 from django.utils.safestring import mark_safe
 from .models import Sucursal, Hortifruti, StockPorSucursal, MovimientoInventario, CredencialHuella
 
+
+# =====================================================================
+# 🔥 INYECCIÓN GLOBAL: BOTÓN FLOTANTE INMUNE A JAZZMIN 🔥
+# =====================================================================
+# Sobrescribimos el contexto base del sitio de administración para pintar
+# el botón fijo en la esquina inferior derecha de manera universal.
+original_each_context = admin.site.each_context
+
+def nuevo_each_context(request):
+    context = original_each_context(request)
+    context['html_inyectado'] = mark_safe('''
+        <style>
+            .boton-flotante-tienda-universal {
+                position: fixed !important;
+                bottom: 25px !important;
+                right: 25px !important;
+                background-color: #28a745 !important;
+                color: white !important;
+                font-weight: bold !important;
+                font-size: 15px !important;
+                padding: 12px 22px !important;
+                border-radius: 50px !important;
+                box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3) !important;
+                z-index: 99999999 !important; /* Capa por encima de todo Jazzmin */
+                text-decoration: none !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                transition: transform 0.2s ease, background-color 0.2s ease !important;
+                cursor: pointer !important;
+            }
+            .boton-flotante-tienda-universal:hover, .boton-flotante-tienda-universal:active {
+                background-color: #218838 !important;
+                transform: scale(1.05) !important;
+            }
+            @media (max-width: 768px) {
+                .boton-flotante-tienda-universal {
+                    bottom: 20px !important;
+                    right: 20px !important;
+                    padding: 10px 18px !important;
+                    font-size: 14px !important;
+                }
+            }
+        </style>
+
+        <a href="/" class="boton-flotante-tienda-universal">
+            <i class="fas fa-shopping-basket" style="margin-right: 8px;"></i> Ver Tienda 🏪
+        </a>
+    ''')
+    return context
+
+admin.site.each_context = nuevo_each_context
+# =====================================================================
+
+
 # --- 0. CONFIGURACIÓN BASE RESPONSIVA ---
 class ResponsiveAdmin(admin.ModelAdmin):
     class Media:
@@ -18,11 +73,11 @@ class ResponsiveAdmin(admin.ModelAdmin):
                 'admin/css/custom_admin.css?v=1.5', 
             )
         }
-        # MODIFICADO: Agregamos el archivo JS aquí también para que se ejecute en TODO el admin, no solo en usuarios
         js = (
             'https://code.jquery.com/jquery-3.6.0.min.js',
-            'js/retorno_movil.js?v=2.0',  # <-- Forzamos la actualización de versión
+            'js/retorno_movil.js?v=2.0',  
         )
+
 
 # --- 1. INLINES ---
 class StockInline(admin.TabularInline):
