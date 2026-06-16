@@ -10,76 +10,72 @@ from django.utils.safestring import mark_safe
 from .models import Sucursal, Hortifruti, StockPorSucursal, MovimientoInventario, CredencialHuella
 
 
-# --- 0. CONFIGURACIÓN BASE RESPONSIVA (INYECCIÓN AUTOMÁTICA EN EL FLOTANTE) ---
+# =====================================================================
+# 🔥 TRUCO MAESTRO: INYECCIÓN GLOBAL EN TODO EL PANEL DE JAZZMIN 🔥
+# =====================================================================
+# Modificamos el contexto base de Django Admin para que el script de la tienda
+# se cargue en CUALQUIER sección (Listas, Edición, Formularios, Inicio, etc.)
+original_each_context = admin.site.each_context
+
+def nuevo_each_context(request):
+    context = original_each_context(request)
+    context['html_inyectado'] = mark_safe('''
+        <script>
+            (function() {
+                function inyectarBotonTiendaFlotante() {
+                    if (document.getElementById('enlace-tienda-inyectado')) return;
+
+                    var userMenu = document.getElementById('jazzy-usermenu');
+                    if (userMenu) {
+                        var botonPerfil = userMenu.querySelector('a[href*="change"]');
+                        if (botonPerfil) {
+                            var tiendaLink = document.createElement('a');
+                            tiendaLink.id = 'enlace-tienda-inyectado';
+                            tiendaLink.href = '/'; 
+                            tiendaLink.className = 'dropdown-item dropdown-footer';
+                            
+                            // Estilos estables en verde para resaltar
+                            tiendaLink.style.color = '#28a745';
+                            tiendaLink.style.fontWeight = 'bold';
+                            tiendaLink.style.borderBottom = '1px solid #edf2f7';
+                            tiendaLink.style.textAlign = 'center';
+                            tiendaLink.style.display = 'block';
+                            tiendaLink.style.padding = '0.5rem 1rem';
+
+                            tiendaLink.innerHTML = '<i class="fas fa-shopping-basket" style="margin-right: 6px;"></i> Ver tienda';
+                            botonPerfil.parentNode.insertBefore(tiendaLink, botonPerfil);
+                        }
+                    }
+                }
+
+                // El MutationObserver se encarga de vigilar cuándo Jazzmin abre el menú en móvil
+                var observer = new MutationObserver(function() {
+                    inyectarBotonTiendaFlotante();
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+                window.addEventListener('load', inyectarBotonTiendaFlotante);
+            })();
+        </script>
+    ''')
+    return context
+
+# Sobrescribimos el método original de Django
+admin.site.each_context = nuevo_each_context
+# =====================================================================
+
+
+# --- 0. CONFIGURACIÓN BASE RESPONSIVA ---
 class ResponsiveAdmin(admin.ModelAdmin):
     class Media:
         css = {
             'all': (
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css',
-                'admin/css/custom_admin.css?v=1.3',  # Subimos versión para romper caché
+                'admin/css/custom_admin.css?v=1.4', 
             )
         }
         js = (
             'https://code.jquery.com/jquery-3.6.0.min.js',
         )
-
-    # El "Inyector Mágico": Agrega el botón a la tarjetita blanca de cuenta en PC y Móvil
-    def changelist_view(self, request, extra_context=None):
-        extra_context = extra_context or {}
-        
-        extra_context['html_inyectado'] = mark_safe('''
-            <script>
-                (function() {
-                    function inyectarBotonTiendaFlotante() {
-                        // Si ya agregamos el botón, evitamos duplicados
-                        if (document.getElementById('enlace-tienda-inyectado')) return;
-
-                        // Localizamos el contenedor div#jazzy-usermenu que maneja Jazzmin
-                        var userMenu = document.getElementById('jazzy-usermenu');
-                        if (userMenu) {
-                            // Buscamos el enlace nativo de "Ver perfil" (apunta al cambio de usuario)
-                            var botonPerfil = userMenu.querySelector('a[href*="change"]');
-                            
-                            if (botonPerfil) {
-                                // Construimos dinámicamente nuestro botón con las clases oficiales de Jazzmin
-                                var tiendaLink = document.createElement('a');
-                                tiendaLink.id = 'enlace-tienda-inyectado';
-                                tiendaLink.href = '/'; // Redirección directa a la raíz de tu tienda
-                                tiendaLink.className = 'dropdown-item dropdown-footer';
-                                
-                                // Estilos visuales limpios en verde para resaltar
-                                tiendaLink.style.color = '#28a745';
-                                tiendaLink.style.fontWeight = 'bold';
-                                tiendaLink.style.borderBottom = '1px solid #edf2f7';
-                                tiendaLink.style.textAlign = 'center';
-                                tiendaLink.style.display = 'block';
-                                tiendaLink.style.padding = '0.5rem 1rem';
-
-                                // Icono de carrito/tienda usando FontAwesome
-                                tiendaLink.innerHTML = '<i class="fas fa-shopping-basket" style="margin-right: 6px;"></i> Ver tienda';
-
-                                // Lo acomodamos quirúrgicamente justo ARRIBA de "Ver perfil"
-                                botonPerfil.parentNode.insertBefore(tiendaLink, botonPerfil);
-                            }
-                        }
-                    }
-
-                    // Escuchamos los cambios del DOM (por si Jazzmin renderiza el menú tarde en el celular)
-                    var observer = new MutationObserver(function() {
-                        inyectarBotonTiendaFlotante();
-                    });
-
-                    observer.observe(document.body, {
-                        childList: true,
-                        subtree: true
-                    });
-                    
-                    // Verificación de respaldo en la carga normal
-                    window.addEventListener('load', inyectarBotonTiendaFlotante);
-                })();
-            </script>
-        ''')
-        return super().changelist_view(request, extra_context=extra_context)
 
 
 # --- 1. INLINES ---
@@ -135,9 +131,7 @@ class StockPorSucursalAdmin(ResponsiveAdmin):
     search_fields = ('producto__nombre',)
 
 
-# =====================================================================
-# --- 6. CONFIGURACIÓN DE USUARIOS (CON SEGURO DE CLAVE Y INYECTOR) ---
-# =====================================================================
+# --- 6. CONFIGURACIÓN DE USUARIOS ---
 class CustomUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = User
@@ -145,7 +139,7 @@ class CustomUserChangeForm(UserChangeForm):
 admin.site.unregister(User)
 
 @admin.register(User)
-class CustomUserAdmin(UserAdmin, ResponsiveAdmin): # Modificado aquí para heredar el inyector flotante
+class CustomUserAdmin(UserAdmin, ResponsiveAdmin): 
     form = CustomUserChangeForm  
     list_display = ('username', 'is_staff', 'is_active')
     list_filter = ('is_staff', 'is_active')
@@ -159,19 +153,6 @@ class CustomUserAdmin(UserAdmin, ResponsiveAdmin): # Modificado aquí para hered
         }),
         ('Fechas Importantes', {'fields': ('last_login', 'date_joined')}),
     )
-
-    class Media:
-        css = {
-            'all': (
-                'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css',
-                'admin/css/custom_admin.css?v=1.1',
-            )
-        }
-        js = (
-            'https://code.jquery.com/jquery-3.6.0.min.js',
-            'js/password_toggle.js',
-            'js/retorno_movil.js?v=1.2',  
-        )
 
 
 # --- 7. MOVIMIENTOS E INVENTARIO INTELIGENTE ---
@@ -261,11 +242,9 @@ class MovimientoInventarioAdmin(ResponsiveAdmin):
             values = [float(s['total'] or 0) for s in stats if s['periodo']]
             return {"labels": labels, "values": values}
 
-        # Ejecutamos primero la inyección de la tienda heredada de ResponsiveAdmin
         resultado_base = super().changelist_view(request, extra_context=extra_context)
         extra_context = resultado_base.context_data
         
-        # Agregamos las métricas de los gráficos originales sin romper nada
         extra_context['chart_data_all'] = {
             "horas": obtener_estadisticas(TruncHour, '%H:00'),
             "dias": obtener_estadisticas(TruncDay, '%d/%m'),
