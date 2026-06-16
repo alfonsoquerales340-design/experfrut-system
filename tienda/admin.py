@@ -19,10 +19,10 @@ class ResponsiveAdmin(admin.ModelAdmin):
                 'admin/css/custom_admin.css?v=1.1',
             )
         }
-        # Aseguramos la ruta correcta dentro de static/admin/js/
+        # CORREGIDO: Ruta exacta según tu repositorio de GitHub
         js = (
             'https://code.jquery.com/jquery-3.6.0.min.js',
-            'admin/js/retorno_movil.js?v=1.2',
+            'js/retorno_movil.js?v=1.2',
         )
 
 
@@ -111,11 +111,11 @@ class CustomUserAdmin(UserAdmin):
                 'admin/css/custom_admin.css?v=1.1',
             )
         }
-        # Corregido: Agregada la subcarpeta admin/ para asegurar consistencia de rutas en el servidor
+        # CORREGIDO: Ruta exacta ajustada a static/js/ para evitar cruce de archivos
         js = (
             'https://code.jquery.com/jquery-3.6.0.min.js',
-            'admin/js/password_toggle.js',
-            'admin/js/retorno_movil.js?v=1.2',  
+            'js/password_toggle.js',
+            'js/retorno_movil.js?v=1.2',  
         )
 
 
