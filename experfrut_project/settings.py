@@ -136,10 +136,22 @@ JAZZMIN_SETTINGS = {
         {"name": "Inicio", "url": "admin:index", "permissions": ["auth.view_user"]},
     ],
     
+    # 🏪 ENLACE PERSONALIZADO EN EL MENÚ DESPLEGABLE DE USUARIO
+    # Coloca de forma nativa el botón de regreso dentro de div.dropdown-menu
+    "user_menu_links": [
+        {
+            "name": "Ver Tienda 🏪", 
+            "url": "/", 
+            "new_window": False,
+            "icon": "fas fa-shopping-basket"
+        },
+    ],
+    
     "show_sidebar": True,
     "navigation_expanded": True,
     "theme": "default",
 }
+
 # CONFIGURACIÓN DE REDIRECCIÓN DE AUTENTICACIÓN (Corrige el error de /accounts/login/)
 LOGIN_URL = 'two_factor:login'
 LOGIN_REDIRECT_URL = 'index'
