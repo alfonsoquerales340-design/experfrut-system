@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     function agregarBotonRegresar() {
-        // Evitamos duplicaciones molestas si el script se ejecuta dos veces
+        // Evitamos duplicaciones molestas si el script ya inyectó el botón
         if (document.getElementById('enlace-retorno-tienda')) return;
 
         // 1. Buscamos el contenedor flotante o menú del usuario
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (targetElement) {
                 const tiendaLink = document.createElement('a');
                 tiendaLink.id = 'enlace-retorno-tienda';
-                tiendaLink.href = '/'; // Cambia esto por la URL de tu HTML de la tienda si es diferente (ej: '/tienda/')
+                tiendaLink.href = '/'; // URL de tu HTML de la tienda
                 
                 // Heredamos las clases de "Ver perfil" para que se vea idéntico
                 tiendaLink.className = targetElement.className;
@@ -44,16 +44,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 targetElement.parentNode.insertBefore(tiendaLink, targetElement);
                 
             } else {
-                // 4. Fallback: Si no se encuentra el elemento de anclaje, usamos la inserción al final del contenedor
+                // 4. Fallback: Si no se encuentra el elemento de anclaje (útil para ciertas vistas móviles estáticas)
                 let userLinks = userTools.querySelector('.dropdown-contents') || 
                                 userTools.querySelector('.dropdown-menu') || 
                                 userTools.querySelector('.dropdown-content');
                 
                 if (!userLinks) userLinks = userTools;
 
-                if (userLinks) {
+                // Solo lo metemos como fallback si el menú principal plano es visible (como en barras laterales móviles fijas)
+                if (userLinks && userLinks !== document.body && !userLinks.querySelector('#fallback-tienda')) {
                     const tiendaLi = document.createElement('div');
-                    tiendaLi.id = 'enlace-retorno-tienda';
+                    tiendaLi.id = 'fallback-tienda';
                     tiendaLi.style.borderTop = '1px solid #444';
                     tiendaLi.style.marginTop = '6px';
                     tiendaLi.style.paddingTop = '4px';
@@ -68,7 +69,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Ejecución inicial y retraso por carga asíncrona en dispositivos móviles
+    // Ejecución inicial estándar
     agregarBotonRegresar();
     setTimeout(agregarBotonRegresar, 600);
+
+    // 🔥 EL TRUCO: Observador de mutaciones para menús dinámicos (clics/dropdowns)
+    const observador = new MutationObserver(function(mutations) {
+        agregarBotonRegresar();
+    });
+
+    // Le decimos al navegador que vigile cualquier cambio de etiquetas en todo el body
+    observador.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 });
