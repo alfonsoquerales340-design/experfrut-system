@@ -131,26 +131,15 @@ JAZZMIN_SETTINGS = {
     "search_model": ["auth.User"],
     "user_avatar": None,
     
-    # MODIFICADO: Estructura robusta para obligar a Bootstrap a mostrar el botón en móviles
+    # Solo dejamos el botón de Inicio normal para evitar errores en PC
     "topmenu_links": [
         {"name": "Inicio", "url": "admin:index", "permissions": ["auth.view_user"]},
-        
-        # Al meterlo como un "children", Jazzmin genera un menú tipo Dropdown nativo 
-        # que NO se oculta en celulares y se mantiene visible en la barra de arriba.
-        {
-            "name": "Ver Tienda", 
-            "icon": "fas fa-shopping-basket", 
-            "children": [
-                {"name": "Ir a la Tienda 🏪", "url": "/", "new_window": False},
-            ]
-        },
     ],
     
     "show_sidebar": True,
     "navigation_expanded": True,
     "theme": "default",
 }
-   
 # CONFIGURACIÓN DE REDIRECCIÓN DE AUTENTICACIÓN (Corrige el error de /accounts/login/)
 LOGIN_URL = 'two_factor:login'
 LOGIN_REDIRECT_URL = 'index'
