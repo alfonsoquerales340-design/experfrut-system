@@ -10,19 +10,17 @@ from django.utils.safestring import mark_safe
 from .models import Sucursal, Hortifruti, StockPorSucursal, MovimientoInventario, CredencialHuella
 
 
-# --- 0. CONFIGURACIÓN BASE RESPONSIVA (INYECCIÓN DE SCRIPT MÓVIL) ---
+# --- 0. CONFIGURACIÓN BASE RESPONSIVA (INYECCIÓN DE ESTILOS) ---
 class ResponsiveAdmin(admin.ModelAdmin):
     class Media:
         css = {
             'all': (
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css',
-                'admin/css/custom_admin.css?v=1.1',
+                'admin/css/custom_admin.css?v=1.3',  # Subimos versión para romper caché
             )
         }
-        # CORREGIDO: Ruta exacta según tu repositorio de GitHub
         js = (
             'https://code.jquery.com/jquery-3.6.0.min.js',
-            'js/retorno_movil.js?v=1.2',
         )
 
 
